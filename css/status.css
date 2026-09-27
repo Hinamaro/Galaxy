@@ -36,3 +36,60 @@
 .tracking-privacy { margin: 14px auto 0; color: var(--muted); font-size: .78rem; line-height: 1.55; text-align: center; }
 @media (max-width: 560px) { .status-section { width: calc(100% - 28px); } .status-card { padding: 30px 20px; border-radius: 22px; } .status-actions { flex-direction: column; align-items: stretch; } .artist-area-link { margin-top: -32px; } }
 @media (max-width: 560px) { .tracking-section { width: calc(100% - 28px); padding: 24px 18px; } .tracking-input-row { flex-direction: column; } .tracking-timeline { grid-template-columns: repeat(2, 1fr); } }
+
+/* Consulta pública com acabamento de cartão e etapas em tons coordenados. */
+.status-hero .eyebrow { padding: 8px 13px; border: 1px solid rgba(185,95,135,.16); border-radius: 999px; background: rgba(255,255,255,.65); }
+.status-card { border-color: rgba(222,178,211,.75); background: linear-gradient(135deg, rgba(255,247,251,.97), rgba(242,233,251,.97)); }
+.status-card::before { position: absolute; top: -70px; right: -60px; width: 210px; height: 210px; border: 1px solid rgba(255,255,255,.55); border-radius: 50%; background: radial-gradient(circle, rgba(222,188,244,.22), transparent 70%); content: ""; pointer-events: none; }
+.status-card[data-state="open"] .status-orbit { border-color: rgba(83,143,107,.25); background: #eef8f1; color: #47765e; }
+.status-card[data-state="few"] .status-orbit { border-color: rgba(191,139,74,.25); background: #fff4e8; color: #a36c32; }
+.status-card[data-state="closed"] .status-orbit { border-color: rgba(185,95,135,.22); background: #fff0f6; color: #a5517b; }
+.status-card h2 { letter-spacing: -.045em; }
+.status-card[data-state="open"] h2 { color: #47765e; }
+.status-card[data-state="few"] h2 { color: #9d682e; }
+.status-card[data-state="closed"] h2 { color: #984f78; }
+.status-card .status-slots { width: fit-content; padding: 8px 14px; border: 1px solid rgba(185,95,135,.17); border-radius: 999px; background: rgba(255,255,255,.78); }
+.status-card .status-public-note { border: 1px solid rgba(200,164,215,.35); background: rgba(255,255,255,.68); }
+.tracking-section { position: relative; overflow: hidden; border-color: rgba(220,179,214,.75); background: linear-gradient(145deg, rgba(255,249,253,.98), rgba(242,234,251,.94)); box-shadow: 0 20px 56px rgba(87,56,95,.1); }
+.tracking-section::before { position: absolute; top: -110px; left: -110px; width: 240px; height: 240px; border: 1px solid rgba(255,255,255,.65); border-radius: 50%; background: radial-gradient(circle, rgba(241,191,218,.24), transparent 70%); content: ""; pointer-events: none; }
+.tracking-intro,.tracking-form,.tracking-result,.tracking-message,.tracking-privacy { position: relative; }
+.tracking-intro .eyebrow { padding: 7px 12px; border-radius: 999px; background: rgba(255,255,255,.72); }
+.tracking-intro h2 { letter-spacing: -.045em; }
+.tracking-input-row input { border-color: #e6c8df; box-shadow: 0 5px 16px rgba(91,59,96,.04); }
+.tracking-input-row .button { min-width: 175px; }
+.tracking-message { border: 1px solid rgba(203,161,212,.34); background: #f5eef9; color: #77558a; }
+.tracking-message.is-loading { border-color: #dfcbe9; background: #f6effa; color: #715085; }
+.tracking-message.is-error { border-color: #edc4d7; background: #fff0f5; color: #934b6d; }
+.tracking-result { border-color: rgba(220,179,214,.78); background: rgba(255,255,255,.86); box-shadow: 0 10px 28px rgba(87,56,95,.07); }
+.tracking-result-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.tracking-result-heading h3 { margin: 0; font-size: 1.1rem; }
+.tracking-status-badge { display: inline-flex; align-items: center; width: fit-content; padding: 7px 12px; border: 1px solid transparent; border-radius: 999px; background: #f5eafa; color: #78528f; font-size: .77rem; font-weight: 800; }
+.tracking-status-badge[data-status="received"] { background: #fff0f6; color: #a5517b; }
+.tracking-status-badge[data-status="quote"] { background: #fbeaf5; color: #984c82; }
+.tracking-status-badge[data-status="payment"] { background: #f6e9f7; color: #875190; }
+.tracking-status-badge[data-status="queue"] { background: #f0eafa; color: #74549a; }
+.tracking-status-badge[data-status="sketch"] { background: #ece9fb; color: #65539e; }
+.tracking-status-badge[data-status="approval"] { background: #e8e6f8; color: #564a91; }
+.tracking-status-badge[data-status="finalizing"] { background: #e9e1f4; color: #604780; }
+.tracking-status-badge[data-status="delivered"] { background: #e9f3ed; color: #47765e; }
+.tracking-status-badge[data-status="cancelled"] { background: #f1e9ee; color: #795c6b; }
+.tracking-result .tracking-order-type { margin-top: 6px; color: var(--muted); font-size: .88rem; }
+.tracking-timeline { gap: 9px; }
+.tracking-step { min-height: 42px; display: grid; place-items: center; border: 1px solid rgba(211,190,222,.38); background: #f6f1f8; color: #817389; font-weight: 650; line-height: 1.35; }
+.tracking-step.is-done { border-color: #ead8ec; background: #f7eef8; color: #8a6495; }
+.tracking-step.is-current { border-color: transparent; background: #f5eafa; color: #78528f; box-shadow: inset 0 0 0 1px currentColor; }
+.tracking-step.is-current[data-status="received"] { background: #fff0f6; color: #a5517b; }
+.tracking-step.is-current[data-status="quote"] { background: #fbeaf5; color: #984c82; }
+.tracking-step.is-current[data-status="payment"] { background: #f6e9f7; color: #875190; }
+.tracking-step.is-current[data-status="queue"] { background: #f0eafa; color: #74549a; }
+.tracking-step.is-current[data-status="sketch"] { background: #ece9fb; color: #65539e; }
+.tracking-step.is-current[data-status="approval"] { background: #e8e6f8; color: #564a91; }
+.tracking-step.is-current[data-status="finalizing"] { background: #e9e1f4; color: #604780; }
+.tracking-step.is-current[data-status="delivered"] { background: #e9f3ed; color: #47765e; }
+.tracking-privacy { max-width: 620px; padding: 10px 13px; border-radius: 12px; background: rgba(255,255,255,.55); }
+@media (max-width: 560px) {
+    .tracking-result { padding: 18px 15px; }
+    .tracking-result-heading { align-items: flex-start; flex-direction: column; }
+    .tracking-timeline { gap: 7px; }
+    .tracking-step { padding: 9px 6px; font-size: .72rem; }
+}

@@ -77,35 +77,53 @@ document.addEventListener("DOMContentLoaded", async () => {
         const code = trackingCode.value.trim().replace(/[^a-f\d]/gi, "").toUpperCase();
         if (!client) {
             trackingMessage.textContent = "A consulta está temporariamente indisponível. Tente novamente mais tarde.";
+            trackingMessage.classList.add("is-error");
+            trackingMessage.classList.remove("is-loading");
             trackingMessage.hidden = false;
             return;
         }
         trackingMessage.textContent = "Buscando seu pedido…";
         trackingMessage.hidden = false;
+        trackingMessage.classList.add("is-loading");
         trackingMessage.classList.remove("is-error");
         const { data, error } = await client.rpc("get_public_order_status", { lookup_code: code });
         trackingMessage.hidden = true;
         if (error) {
             trackingMessage.textContent = "Não foi possível consultar agora. Tente novamente mais tarde.";
+            trackingMessage.classList.add("is-error");
+            trackingMessage.classList.remove("is-loading");
             trackingMessage.hidden = false;
             return;
         }
         const order = Array.isArray(data) ? data[0] : data;
         if (!order) {
             trackingMessage.textContent = "Não encontramos esse código. Confira com cuidado ou fale com a artista que registrou seu pedido.";
+            trackingMessage.classList.add("is-error");
+            trackingMessage.classList.remove("is-loading");
             trackingMessage.hidden = false;
             return;
         }
         const statusIndex = orderStatuses.findIndex(([value]) => value === order.status);
-        const heading = document.createElement("h3");
-        heading.textContent = order.status === "cancelled" ? "Pedido cancelado" : (orderStatuses[statusIndex]?.[1] || "Pedido em andamento");
+        const statusLabel = order.status === "cancelled" ? "Pedido cancelado" : (orderStatuses[statusIndex]?.[1] || "Pedido em andamento");
+        trackingResult.dataset.status = order.status;
+        const heading = document.createElement("div");
+        heading.className = "tracking-result-heading";
+        const title = document.createElement("h3");
+        title.textContent = "Acompanhe sua comissão";
+        const badge = document.createElement("span");
+        badge.className = "tracking-status-badge";
+        badge.dataset.status = order.status;
+        badge.textContent = statusLabel;
+        heading.append(title, badge);
         const subtitle = document.createElement("p");
+        subtitle.className = "tracking-order-type";
         subtitle.textContent = `${order.art_type} · recebido em ${new Date(order.created_at).toLocaleDateString("pt-BR")}`;
         const timeline = document.createElement("div");
         timeline.className = "tracking-timeline";
         if (order.status !== "cancelled") {
             orderStatuses.forEach(([value, label], index) => {
                 const step = document.createElement("div");
+                step.dataset.status = value;
                 step.className = `tracking-step${index < statusIndex ? " is-done" : ""}${index === statusIndex ? " is-current" : ""}`;
                 step.textContent = label;
                 timeline.append(step);

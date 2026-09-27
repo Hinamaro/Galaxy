@@ -170,14 +170,22 @@ document.addEventListener("DOMContentLoaded", async () => {
         data.forEach(order => {
             const row = document.createElement("article");
             row.className = "order-row";
+            row.dataset.status = order.status;
             const details = document.createElement("div");
             const heading = document.createElement("h4");
             heading.textContent = order.client_name;
+            const badge = document.createElement("span");
+            badge.className = "order-status-badge";
+            badge.dataset.status = order.status;
+            badge.textContent = orderStatuses.find(([value]) => value === order.status)?.[1] || "Em andamento";
             const contact = document.createElement("p");
+            contact.className = "order-contact";
             contact.textContent = order.client_contact;
             const type = document.createElement("p");
+            type.className = "order-type";
             type.textContent = order.art_type;
             const summary = document.createElement("p");
+            summary.className = "order-summary";
             summary.textContent = order.summary;
             const date = document.createElement("span");
             date.className = "order-date";
@@ -200,9 +208,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                 });
                 tracking.append(document.createTextNode(" "), copyCode);
             }
-            details.append(heading, contact, type, summary, date, tracking);
+            details.append(heading, badge, contact, type, summary, date, tracking);
 
             const select = document.createElement("select");
+            select.dataset.status = order.status;
             select.setAttribute("aria-label", `Etapa do pedido de ${order.client_name}`);
             orderStatuses.forEach(([value, label]) => {
                 const option = document.createElement("option");
@@ -220,6 +229,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                     setMessage("Não foi possível atualizar a etapa do pedido.", true);
                     await loadOrders();
                 } else {
+                    select.dataset.status = select.value;
+                    row.dataset.status = select.value;
+                    badge.dataset.status = select.value;
+                    badge.textContent = select.selectedOptions[0].textContent;
                     setMessage(`Etapa atualizada: ${select.selectedOptions[0].textContent}.`);
                 }
             });
