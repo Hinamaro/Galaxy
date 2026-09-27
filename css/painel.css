@@ -1,0 +1,38 @@
+.admin-main { width: min(1050px, calc(100% - 36px)); margin: 0 auto; padding: 48px 0 88px; }
+.admin-heading { margin-bottom: 28px; text-align: center; }
+.admin-heading h1 { margin: 8px 0; font-size: clamp(2rem, 5vw, 3.2rem); }
+.admin-heading p { color: var(--muted); }
+.admin-alert,.admin-message { margin: 0 auto 18px; padding: 13px 16px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,.7); color: var(--text-soft); line-height: 1.5; }
+.admin-alert:empty,.admin-message:empty { display: none; }
+.admin-card { margin: 20px 0; padding: clamp(22px, 4vw, 34px); border: 1px solid var(--line); border-radius: 22px; background: var(--surface); box-shadow: 0 12px 35px rgba(74,45,54,.07); }
+.admin-card h2,.admin-card h3,.dashboard-top h2 { margin: 7px 0 8px; }
+.auth-card { max-width: 620px; margin: 20px auto; }
+.auth-card > p { color: var(--muted); line-height: 1.65; }
+.admin-form { display: grid; gap: 10px; margin-top: 22px; }
+.admin-form label,.availability-form label,.order-form label { color: var(--text-soft); font-size: .86rem; font-weight: 750; }
+.admin-form input,.availability-form input,.availability-form select,.order-form input,.order-form textarea { width: 100%; min-height: 48px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,.86); color: var(--text); font: inherit; }
+.admin-form input:focus,.availability-form input:focus,.availability-form select:focus,.order-form input:focus,.order-form textarea:focus { outline: 3px solid rgba(185,95,135,.2); border-color: var(--accent-dark); }
+.admin-form .button { margin-top: 8px; justify-self: start; }
+.password-recovery-link { margin-top: 16px; padding: 6px 0; border: 0; background: transparent; color: var(--accent-dark); font: inherit; font-size: .9rem; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.auth-qr { width: min(230px, 100%); margin: 18px auto; padding: 12px; border: 1px solid var(--line); border-radius: 16px; background: white; }
+.auth-secret-label { color: var(--muted); font-size: .84rem; }
+#auth-secret { display: block; overflow-wrap: anywhere; padding: 12px; border-radius: 10px; background: var(--surface-2); color: var(--text); font-size: .83rem; }
+.admin-dashboard[hidden],.admin-card[hidden],.admin-message[hidden],#enroll-details[hidden],#signin-panel[hidden],#mfa-panel[hidden],#enroll-panel[hidden] { display: none !important; }
+.dashboard-top,.card-heading { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.availability-form { display: grid; grid-template-columns: minmax(150px,.6fr) minmax(160px,1fr); align-items: center; gap: 12px 18px; margin-top: 22px; }
+.availability-form button { grid-column: 2; justify-self: start; margin-top: 6px; }
+.order-form { display: grid; grid-template-columns: 190px minmax(0,1fr); align-items: start; gap: 12px 18px; margin: 22px 0 12px; }
+.order-form label { padding-top: 13px; }
+.order-form textarea { resize: vertical; }
+.order-form button { grid-column: 2; justify-self: start; }
+.privacy-note { color: var(--muted); font-size: .8rem; }
+.orders-list { display: grid; gap: 12px; margin-top: 20px; }
+.order-row { display: grid; grid-template-columns: minmax(0,1fr) minmax(190px,240px); align-items: center; gap: 16px; padding: 18px; border: 1px solid var(--line); border-radius: 16px; background: rgba(255,255,255,.62); }
+.order-row h4 { margin: 0 0 5px; color: var(--text); }
+.order-row p { margin: 3px 0; color: var(--muted); font-size: .84rem; overflow-wrap: anywhere; }
+.order-row select { width: 100%; min-height: 46px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 11px; background: white; color: var(--text); font: inherit; }
+.order-date { color: var(--muted); font-size: .72rem; }
+@media (max-width: 650px) { .admin-main { width: calc(100% - 28px); padding-top: 32px; } .availability-form,.order-form { grid-template-columns: 1fr; gap: 8px; } .availability-form button,.order-form button { grid-column: 1; } .order-form label:not(:first-child) { margin-top: 8px; } .order-row { grid-template-columns: 1fr; } .dashboard-top { align-items: flex-start; flex-direction: column; } .dashboard-top .button { width: 100%; } }
+
+.admin-message.is-error { border-color: rgba(169,80,112,.35); background: #fff0f4; color: #963b5a; }
+.admin-message.is-success { border-color: rgba(55,133,92,.3); background: #effaf3; color: #286e49; }

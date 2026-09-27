@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="Consulte a disponibilidade atual das comissões de arte Zoolixianas.">
+    <title>Status das comissões | Zoolixianas</title>
+    <link rel="icon" href="assets/branding/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/decorations.css">
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/mobile.css">
+    <link rel="stylesheet" href="css/status.css">
+</head>
+<body>
+<header class="site-header" id="site-header">
+    <div class="header-inner">
+        <a href="index.html" class="brand" aria-label="Voltar para a página inicial">
+            <span class="brand-mark">✦</span>
+            <span class="brand-text"><strong>Zoolixianas</strong><small>Artistas de outras galáxias</small></span>
+        </a>
+        <nav class="main-nav" id="main-nav" aria-label="Navegação principal">
+            <a href="index.html">Início</a><a href="gallery.html">Galeria</a><a href="commissions.html">Comissões</a><a class="active" href="status.html">Status</a><a href="about.html">Sobre</a><a href="contact.html">Contato</a>
+        <a class="artist-access-link" href="painel.html"><span aria-hidden="true">✦</span> Área das artistas</a></nav>
+        <button class="menu-toggle" id="menu-toggle" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="main-nav">☰</button>
+    </div>
+</header>
+<main>
+    <section class="page-hero status-hero">
+        <span class="eyebrow">✦ Disponibilidade</span>
+        <h1>Como está a <span>fila?</span></h1>
+        <p>Consulte aqui se estamos recebendo novas comissões.</p>
+    </section>
+    <section class="status-section" aria-labelledby="status-title">
+        <article class="status-card" aria-live="polite">
+            <div class="status-orbit" aria-hidden="true"><span>✦</span></div>
+            <span class="status-kicker">Status atual</span>
+            <h2 id="status-title">Carregando disponibilidade…</h2>
+            <p id="status-description">Buscando a atualização mais recente.</p>
+            <p class="status-slots" id="status-slots" hidden></p>
+            <p class="status-public-note" id="status-note" hidden></p>
+            <small class="status-updated" id="status-updated"></small>
+            <div class="status-actions">
+                <a class="button button-primary" href="contact.html">Consultar uma comissão</a>
+                <a class="button button-secondary" href="commissions.html">Ver preços e detalhes</a>
+            </div>
+        </article>
+        <p class="status-footnote">A disponibilidade pode mudar. O pedido só fica confirmado depois da conversa com a artista.</p>
+    </section>
+</main>
+<div class="artist-area-link"><a href="painel.html">Área das artistas <span aria-hidden="true">↗</span></a></div>
+<footer class="site-footer">
+    <div class="footer-inner">
+        <div class="footer-brand"><strong>Zoolixianas</strong><span>Arte digital de exploradoras da galáxia</span><p>Ilustrações, personagens e universos criados com carinho.</p></div>
+        <nav class="footer-links" aria-label="Navegação do rodapé"><a href="index.html">Início</a><a href="gallery.html">Galeria</a><a href="commissions.html">Comissões</a><a href="status.html">Status</a><a href="about.html">Sobre</a><a href="contact.html">Contato</a><a href="painel.html">Área das artistas</a></nav>
+        <div class="footer-cta"><span class="eyebrow">Vamos criar algo?</span><p>Sua ideia pode virar uma nova aventura.</p><a href="contact.html" class="footer-button">Solicitar comissão <span aria-hidden="true">↗</span></a></div>
+    </div>
+    <div class="footer-bottom"><small>© <span id="current-year">2026</span> Zoolixianas. Todos os direitos reservados.</small><span>Feito com ✦ e imaginação</span></div>
+</footer>
+<script src="js/app.js"></script>
+<script src="js/navigation.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/backend-config.js"></script>
+<script src="js/status.js"></script>
+</body>
+</html>
+

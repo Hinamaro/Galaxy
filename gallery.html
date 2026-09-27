@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    >
+
+    <title>Galeria | Zoolixianas</title>
+
+    <meta
+        name="description"
+        content="Galeria de ilustrações digitais e trabalhos das Zoolixianas."
+    >
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/decorations.css">
+    <link rel="stylesheet" href="css/gallery.css">
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/lightbox.css">
+    <link rel="stylesheet" href="css/mobile.css">
+</head>
+
+<body>
+
+<header class="site-header" id="site-header">
+
+    <div class="header-inner">
+
+        <a
+            href="index.html"
+            class="brand"
+            aria-label="Voltar para a página inicial"
+        >
+            <span class="brand-mark">✦</span>
+
+            <span class="brand-text">
+                <strong>Zoolixianas</strong>
+                <small>Artistas de outras galáxias</small>
+            </span>
+        </a>
+
+
+        <nav class="main-nav" id="main-nav" aria-label="Navegação principal">
+            <a href="index.html">Início</a>
+            <a class="active" href="gallery.html">Galeria</a>
+            <a href="commissions.html">Comissões</a>
+            <a href="status.html">Status</a>
+            <a href="about.html">Sobre</a>
+            <a href="contact.html">Contato</a>
+        <a class="artist-access-link" href="painel.html"><span aria-hidden="true">✦</span> Área das artistas</a></nav>
+
+
+        <button
+            class="menu-toggle"
+            id="menu-toggle"
+            aria-controls="main-nav"
+            type="button"
+            aria-label="Abrir menu"
+            aria-expanded="false"
+        >
+            ☰
+        </button>
+
+    </div>
+
+</header>
+
+
+<main>
+
+    <!-- CABEÇALHO -->
+
+    <section class="page-hero">
+
+        <span class="eyebrow">
+            ✦ Portfólio
+        </span>
+
+        <h1>
+            Nossa galeria
+        </h1>
+
+        <p>
+            Alguns dos personagens, ideias e histórias
+            que tive o prazer de transformar em arte.
+        </p>
+
+    </section>
+
+
+    <!-- GALERIA -->
+
+    <section class="gallery-section">
+
+        <div class="gallery-filters">
+
+            <button
+                class="gallery-filter active"
+                data-filter="all"
+            >
+                Todas
+            </button>
+
+            <button
+                class="gallery-filter"
+                data-filter="character"
+            >
+                Personagens
+            </button>
+
+            <button
+                class="gallery-filter"
+                data-filter="fanart"
+            >
+                Fanarts
+            </button>
+
+            <button
+                class="gallery-filter"
+                data-filter="oc"
+            >
+                OCs
+            </button>
+
+            <button
+                class="gallery-filter"
+                data-filter="illustration"
+            >
+                Ilustrações
+            </button>
+
+        </div>
+
+
+        <div class="gallery-grid">
+
+    <!-- =====================================================
+         ARTE 01
+         ===================================================== -->
+
+    <article
+        class="gallery-item spotlight reveal"
+        data-category="character"
+        data-title="Nome da personagem"
+        data-description="Ilustração de personagem em estilo anime."
+    >
+
+        <button
+            class="gallery-image-button"
+            type="button"
+            data-lightbox-trigger="gallery"
+        >
+
+            <img
+                src="assets/gallery/art-01.svg"
+                alt="Ilustração de personagem"
+                class="gallery-image"
+            >
+
+        </button>
+
+
+        <div class="gallery-overlay">
+
+            <span class="tag">
+                Full Body
+            </span>
+
+            <h3>
+                Nome da personagem
+            </h3>
+
+            <span class="arrow-link">
+                Ver trabalho
+                <span>→</span>
+            </span>
+
+        </div>
+
+    </article>
+
+
+    <!-- =====================================================
+         ARTE 02
+         ===================================================== -->
+
+    <article
+        class="gallery-item spotlight reveal delay-1"
+        data-category="fanart"
+        data-title="Fanart Anime"
+        data-description="Fanart de personagem em estilo anime."
+    >
+
+        <button
+            class="gallery-image-button"
+            type="button"
+            data-lightbox-trigger="gallery"
+        >
+
+            <img
+                src="assets/gallery/art-02.svg"
+                alt="Fanart de personagem anime"
+                class="gallery-image"
+            >
+
+        </button>
+
+
+        <div class="gallery-overlay">
+
+            <span class="tag">
+                Fanart
+            </span>
+
+            <h3>
+                Fanart Anime
+            </h3>
+
+            <span class="arrow-link">
+                Ver trabalho
+                <span>→</span>
+            </span>
+
+        </div>
+
+    </article>
+
+
+    <!-- =====================================================
+         ARTE 03
+         ===================================================== -->
+
+    <article
+        class="gallery-item spotlight reveal delay-2"
+        data-category="oc"
+        data-title="Original Character"
+        data-description="Design e ilustração de personagem original."
+    >
+
+        <button
+            class="gallery-image-button"
+            type="button"
+            data-lightbox-trigger="gallery"
+        >
+
+            <img
+                src="assets/gallery/art-03.svg"
+                alt="Original Character"
+                class="gallery-image"
+            >
+
+        </button>
+
+
+        <div class="gallery-overlay">
+
+            <span class="tag">
+                OC
+            </span>
+
+            <h3>
+                Original Character
+            </h3>
+
+            <span class="arrow-link">
+                Ver trabalho
+                <span>→</span>
+            </span>
+
+        </div>
+
+    </article>
+
+
+    <!-- =====================================================
+         ARTE 04
+         ===================================================== -->
+
+    <article
+        class="gallery-item spotlight reveal delay-3"
+        data-category="illustration"
+        data-title="Ilustração Digital"
+        data-description="Ilustração digital completa."
+    >
+
+        <button
+            class="gallery-image-button"
+            type="button"
+            data-lightbox-trigger="gallery"
+        >
+
+            <img
+                src="assets/gallery/art-04.svg"
+                alt="Ilustração digital"
+                class="gallery-image"
+            >
+
+        </button>
+
+
+        <div class="gallery-overlay">
+
+            <span class="tag">
+                Ilustração
+            </span>
+
+            <h3>
+                Ilustração Digital
+            </h3>
+
+            <span class="arrow-link">
+                Ver trabalho
+                <span>→</span>
+            </span>
+
+        </div>
+
+    </article>
+
+
+    <!-- =====================================================
+         ARTE 05
+         ===================================================== -->
+
+    <article
+        class="gallery-item spotlight reveal delay-4"
+        data-category="character"
+        data-title="Character Design"
+        data-description="Arte focada em character design."
+    >
+
+        <button
+            class="gallery-image-button"
+            type="button"
+            data-lightbox-trigger="gallery"
+        >
+
+            <img
+                src="assets/gallery/art-05.svg"
+                alt="Character design"
+                class="gallery-image"
+            >
+
+        </button>
+
+
+        <div class="gallery-overlay">
+
+            <span class="tag">
+                Character Design
+            </span>
+
+            <h3>
+                Character Design
+            </h3>
+
+            <span class="arrow-link">
+                Ver trabalho
+                <span>→</span>
+            </span>
+
+        </div>
+
+    </article>
+
+
+    <!-- =====================================================
+         ARTE 06
+         ===================================================== -->
+
+    <article
+        class="gallery-item spotlight reveal"
+        data-category="fanart"
+        data-title="Fanart"
+        data-description="Fanart em estilo anime."
+    >
+
+        <button
+            class="gallery-image-button"
+            type="button"
+            data-lightbox-trigger="gallery"
+        >
+
+            <img
+                src="assets/gallery/art-06.svg"
+                alt="Fanart em estilo anime"
+                class="gallery-image"
+            >
+
+        </button>
+
+
+        <div class="gallery-overlay">
+
+            <span class="tag">
+                Fanart
+            </span>
+
+            <h3>
+                Fanart
+            </h3>
+
+            <span class="arrow-link">
+                Ver trabalho
+                <span>→</span>
+            </span>
+
+        </div>
+
+    </article>
+
+</div>
+
+    </section>
+
+
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="lightbox-title">
+    <div class="lightbox-dialog">
+        <div class="lightbox-media">
+            <button class="lightbox-close" type="button" aria-label="Fechar visualização">×</button>
+            <button class="lightbox-nav lightbox-prev" type="button" aria-label="Imagem anterior" hidden>‹</button>
+            <div class="lightbox-image" aria-live="polite"></div>
+            <button class="lightbox-nav lightbox-next" type="button" aria-label="Próxima imagem" hidden>›</button>
+            <span class="lightbox-counter" id="lightbox-counter" aria-live="polite"></span>
+        </div>
+        <div class="lightbox-details">
+            <span class="tag" id="lightbox-category">Arte digital</span>
+            <h2 id="lightbox-title">Ilustração</h2>
+            <p id="lightbox-description"></p>
+            <span class="lightbox-hint">Use as setas do teclado para navegar</span>
+        </div>
+    </div>
+</div>
+
+
+    <!-- CTA -->
+
+    <section class="contact-banner reveal">
+
+        <div>
+
+            <span class="eyebrow">
+                Gostou do que viu?
+            </span>
+
+            <h2>
+                Vamos criar sua arte.
+            </h2>
+
+        </div>
+
+        <a
+            href="contact.html"
+            class="button button-primary"
+        >
+            Solicitar comissão
+        </a>
+
+    </section>
+
+</main>
+
+
+<footer class="site-footer">
+
+    <div class="footer-inner">
+
+        <div class="footer-brand">
+            <strong>Zoolixianas</strong>
+
+            <span>
+                Arte digital de exploradoras da galáxia
+            </span>
+
+            <p>
+                Ilustrações, personagens e universos
+                criados com carinho.
+            </p>
+        </div>
+
+        <nav
+            class="footer-links"
+            aria-label="Navegação do rodapé"
+        >
+            <a href="index.html">Início</a>
+            <a href="gallery.html">Galeria</a>
+            <a href="commissions.html">Comissões</a>
+            <a href="status.html">Status</a>
+            <a href="about.html">Sobre nós</a>
+            <a href="contact.html">Contato</a>
+        <a href="painel.html">Área das artistas</a></nav>
+
+        <div class="footer-cta">
+            <span class="eyebrow">
+                Vamos criar algo?
+            </span>
+
+            <p>
+                Sua ideia pode virar uma nova aventura.
+            </p>
+
+            <a
+                href="contact.html"
+                class="footer-button"
+            >
+                Solicitar comissão
+                <span aria-hidden="true">↗</span>
+            </a>
+        </div>
+
+    </div>
+
+    <div class="footer-bottom">
+        <small>
+            © <span id="current-year">2026</span>
+            Zoolixianas. Todos os direitos reservados.
+        </small>
+
+        <span>
+            Feito com ✦ e imaginação
+        </span>
+    </div>
+
+</footer>
+
+
+<script src="js/app.js"></script>
+<script src="js/navigation.js"></script>
+<script src="js/reveal.js"></script>
+<script src="js/gallery.js"></script>
+<script src="js/lightbox.js"></script>
+<script src="js/spotlight.js"></script>
+<script src="js/decorations.js"></script>
+
+</body>
+
+</html>
+

@@ -1,0 +1,192 @@
+/* =========================================================
+   SOBRE — ZOOLIXIANAS
+   ========================================================= */
+
+.about-hero {
+    padding-bottom: 60px;
+}
+
+.about-page {
+    display: grid;
+    grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+    align-items: center;
+    gap: clamp(42px, 8vw, 100px);
+
+    padding-top: 30px;
+}
+
+
+/* =========================================================
+   IMAGEM / AVATAR
+   ========================================================= */
+
+.about-image {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 460px;
+    overflow: hidden;
+
+    border: 2px solid var(--line);
+    border-radius: var(--radius-large);
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--accent-soft),
+            var(--accent-purple-soft)
+        );
+
+    color: var(--accent-dark);
+    text-align: center;
+
+    box-shadow: var(--shadow-small);
+}
+
+.about-image::before,
+.about-image::after {
+    content: "";
+
+    position: absolute;
+
+    border: 1px solid rgba(255, 255, 255, .9);
+    border-radius: 50%;
+
+    pointer-events: none;
+}
+
+.about-image::before {
+    width: 190px;
+    height: 190px;
+
+    transform: translate(-70px, -80px);
+}
+
+.about-image::after {
+    width: 250px;
+    height: 250px;
+
+    transform: translate(80px, 80px);
+}
+
+.about-image span {
+    position: relative;
+    z-index: 1;
+
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .16em;
+    line-height: 1.8;
+}
+
+
+/* =========================================================
+   TEXTO
+   ========================================================= */
+
+.about-copy {
+    max-width: 590px;
+}
+
+.about-copy h2 {
+    margin: 10px 0 22px;
+
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 4vw, 3.7rem);
+    line-height: 1.05;
+    letter-spacing: -.045em;
+}
+
+.about-copy h2 span {
+    color: var(--accent-dark);
+}
+
+.about-copy p {
+    margin: 0 0 14px;
+
+    color: var(--text-soft);
+    line-height: 1.8;
+}
+
+
+/* =========================================================
+   REDES SOCIAIS
+   ========================================================= */
+
+.social-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+
+    margin-top: 28px;
+}
+
+.social-links a {
+    padding: 9px 14px;
+
+    border: 1px solid var(--line);
+    border-radius: 999px;
+
+    background: rgba(255, 255, 255, .65);
+    color: var(--accent-dark);
+
+    font-size: .76rem;
+    font-weight: 750;
+
+    transition:
+        background var(--transition),
+        border-color var(--transition),
+        transform var(--transition);
+}
+
+.social-links a:hover {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    transform: translateY(-3px);
+}
+
+
+/* =========================================================
+   RESPONSIVO
+   ========================================================= */
+
+@media (max-width: 800px) {
+    .about-page {
+        grid-template-columns: 1fr;
+        gap: 42px;
+    }
+
+    .about-image {
+        min-height: 360px;
+    }
+
+    .about-copy {
+        max-width: 650px;
+        text-align: center;
+    }
+
+    .about-copy .eyebrow {
+        justify-content: center;
+    }
+
+    .social-links {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 520px) {
+    .about-page {
+        width: calc(100% - 28px);
+    }
+
+    .about-image {
+        min-height: 300px;
+    }
+
+    .about-copy h2 {
+        font-size: 2.2rem;
+    }
+}

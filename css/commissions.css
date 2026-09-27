@@ -1,0 +1,884 @@
+/* =========================================================
+   COMMISSIONS
+   ========================================================= */
+
+.commissions-hero {
+    padding-bottom: 70px;
+}
+
+.commissions-hero h1 span {
+    color: var(--accent-dark);
+}
+
+
+/* =========================================================
+   PRICING
+   ========================================================= */
+
+.commission-pricing-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 22px;
+
+    align-items: start;
+}
+
+
+.pricing-card {
+    position: relative;
+
+    overflow: hidden;
+
+    background: var(--surface);
+
+    border: 1px solid var(--line);
+
+    border-radius: 20px;
+
+    box-shadow:
+        0 5px 20px
+        rgba(74,45,54,.06);
+
+    transition:
+        transform .35s ease,
+        box-shadow .35s ease;
+}
+
+
+.pricing-card:hover {
+    transform:
+        translateY(-8px);
+
+    box-shadow:
+        0 22px 50px
+        rgba(74,45,54,.13);
+}
+
+
+/* =========================================================
+   CARD EM DESTAQUE
+   ========================================================= */
+
+.pricing-card-featured {
+    border:
+        2px solid
+        rgba(232,154,170,.6);
+
+    transform:
+        translateY(-12px);
+}
+
+
+.pricing-card-featured:hover {
+    transform:
+        translateY(-18px);
+}
+
+
+.pricing-badge {
+    position: absolute;
+
+    top: 16px;
+    right: 16px;
+
+    z-index: 5;
+
+    padding:
+        7px 13px;
+
+    border-radius: 999px;
+
+    background:
+        var(--accent);
+
+    color: white;
+
+    font-size: .72rem;
+
+    font-weight: 800;
+
+    text-transform: uppercase;
+
+    letter-spacing: .07em;
+}
+
+
+/* =========================================================
+   IMAGEM
+   ========================================================= */
+
+.pricing-image {
+    aspect-ratio: 4 / 3;
+
+    overflow: hidden;
+}
+
+
+.pricing-image .art-placeholder {
+    width: 100%;
+    height: 100%;
+
+    min-height: 100%;
+
+    transition:
+        transform .6s
+        cubic-bezier(.22,.61,.36,1);
+}
+
+
+.pricing-card:hover
+.pricing-image
+.art-placeholder {
+    transform:
+        scale(1.045);
+}
+
+
+/* =========================================================
+   CONTEÚDO
+   ========================================================= */
+
+.pricing-content {
+    padding: 27px;
+}
+
+
+.pricing-category {
+    color: var(--accent-dark);
+
+    font-size: .72rem;
+
+    font-weight: 800;
+
+    text-transform: uppercase;
+
+    letter-spacing: .13em;
+}
+
+
+.pricing-content h3 {
+    margin:
+        6px 0 8px;
+
+    font-size: 1.8rem;
+}
+
+
+.pricing-description {
+    min-height: 78px;
+
+    color: var(--muted);
+
+    font-size: .91rem;
+}
+
+
+.pricing-price {
+    display: flex;
+
+    flex-direction: column;
+
+    margin:
+        22px 0;
+}
+
+
+.pricing-price small {
+    color: var(--muted);
+
+    font-size: .76rem;
+}
+
+
+.pricing-price strong {
+    color: var(--accent-dark);
+
+    font-size: 2rem;
+
+    line-height: 1.2;
+}
+
+
+.pricing-features {
+    display: grid;
+
+    gap: 8px;
+
+    list-style: none;
+
+    padding: 0;
+
+    margin:
+        0 0 25px;
+
+    color: var(--muted);
+
+    font-size: .88rem;
+}
+
+
+.pricing-content .button {
+    width: 100%;
+}
+
+
+/* =========================================================
+   ADICIONAIS
+   ========================================================= */
+
+.addons-section {
+    padding:
+        90px
+        max(20px, calc((100% - var(--max)) / 2));
+
+    background:
+        rgba(255,255,255,.42);
+}
+
+
+.addons-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 15px;
+}
+
+
+.addon-card {
+    display: grid;
+
+    grid-template-columns:
+        auto 1fr auto;
+
+    align-items: center;
+
+    gap: 18px;
+
+    padding: 22px;
+
+    background: var(--surface);
+
+    border:
+        1px solid
+        var(--line);
+
+    border-radius: 15px;
+
+    transition:
+        transform .3s ease,
+        box-shadow .3s ease;
+}
+
+
+.addon-card:hover {
+    transform:
+        translateY(-4px);
+
+    box-shadow:
+        0 12px 30px
+        rgba(74,45,54,.09);
+}
+
+
+.addon-icon {
+    width: 48px;
+    height: 48px;
+
+    display: grid;
+
+    place-items: center;
+
+    border-radius: 14px;
+
+    background:
+        rgba(232,154,170,.15);
+
+    color: var(--accent-dark);
+
+    font-size: 1.4rem;
+}
+
+
+.addon-card h3 {
+    margin:
+        0 0 3px;
+
+    font-size: 1rem;
+}
+
+
+.addon-card p {
+    margin: 0;
+
+    color: var(--muted);
+
+    font-size: .85rem;
+}
+
+
+.addon-card > strong {
+    color: var(--accent-dark);
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   INCLUÍDO
+   ========================================================= */
+
+.included-layout {
+    display: grid;
+
+    grid-template-columns:
+        .75fr 1.25fr;
+
+    gap:
+        clamp(45px, 8vw, 100px);
+
+    align-items: start;
+}
+
+
+.included-copy {
+    position: sticky;
+
+    top: 130px;
+}
+
+
+.included-copy h2 {
+    max-width: 400px;
+
+    margin:
+        10px 0 18px;
+
+    font-size:
+        clamp(2.2rem, 4vw, 3.5rem);
+}
+
+
+.included-copy p {
+    max-width: 430px;
+
+    color: var(--muted);
+
+    line-height: 1.8;
+}
+
+
+.included-list {
+    display: grid;
+
+    gap: 0;
+}
+
+
+.included-item {
+    display: grid;
+
+    grid-template-columns:
+        60px 1fr;
+
+    gap: 22px;
+
+    padding:
+        25px 0;
+
+    border-bottom:
+        1px solid
+        var(--line);
+}
+
+
+.included-item:first-child {
+    border-top:
+        1px solid
+        var(--line);
+}
+
+
+.included-item > span {
+    color: var(--accent);
+
+    font-size: 1rem;
+
+    font-weight: 900;
+}
+
+
+.included-item h3 {
+    margin:
+        0 0 6px;
+
+    font-size: 1.05rem;
+}
+
+
+.included-item p {
+    margin: 0;
+
+    color: var(--muted);
+
+    font-size: .9rem;
+}
+
+
+/* =========================================================
+   PROCESSO
+   ========================================================= */
+
+.commission-process-section {
+    padding:
+        90px
+        max(20px, calc((100% - var(--max)) / 2));
+
+    background:
+        var(--surface-2);
+}
+
+
+.commission-process {
+    display: grid;
+
+    grid-template-columns:
+        repeat(5, 1fr);
+
+    gap: 15px;
+}
+
+
+.process-step {
+    padding: 25px;
+
+    background:
+        rgba(255,255,255,.75);
+
+    border:
+        1px solid
+        var(--line);
+
+    border-radius: 15px;
+}
+
+
+.process-step > span {
+    color: var(--accent);
+
+    font-weight: 900;
+
+    font-size: 1.4rem;
+}
+
+
+.process-step h3 {
+    margin:
+        10px 0 6px;
+}
+
+
+.process-step p {
+    margin: 0;
+
+    color: var(--muted);
+
+    font-size: .85rem;
+}
+
+
+/* =========================================================
+   TERMOS
+   ========================================================= */
+
+.terms-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 16px;
+}
+
+
+.term-card {
+    padding: 24px;
+
+    border:
+        1px solid
+        var(--line);
+
+    border-radius: 15px;
+
+    background:
+        rgba(255,255,255,.55);
+}
+
+
+.term-card h3 {
+    margin:
+        0 0 9px;
+}
+
+
+.term-card p {
+    margin: 0;
+
+    color: var(--muted);
+
+    font-size: .86rem;
+}
+
+
+/* =========================================================
+   CTA
+   ========================================================= */
+
+.commission-cta {
+    width:
+        min(
+            var(--max),
+            calc(100% - 40px)
+        );
+
+    margin:
+        0 auto 90px;
+
+    padding:
+        clamp(35px, 5vw, 60px);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 30px;
+
+    border-radius: 24px;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--surface),
+            var(--accent-soft)
+        );
+
+    border:
+        1px solid
+        var(--line);
+
+    box-shadow:
+        var(--shadow);
+}
+
+
+.commission-cta h2 {
+    margin:
+        8px 0 10px;
+
+    font-size:
+        clamp(2rem, 4vw, 3rem);
+}
+
+
+.commission-cta p {
+    margin: 0;
+
+    color: var(--muted);
+}
+
+
+/* =========================================================
+   RESPONSIVO
+   ========================================================= */
+
+@media (max-width: 1000px) {
+
+    .commission-pricing-grid {
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+
+    .pricing-card-featured {
+        transform: none;
+    }
+
+
+    .pricing-card-featured:hover {
+        transform:
+            translateY(-8px);
+    }
+
+
+    .commission-process {
+        grid-template-columns:
+            repeat(3, 1fr);
+    }
+
+
+    .terms-grid {
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+}
+
+
+@media (max-width: 760px) {
+
+    .commission-pricing-grid,
+    .addons-grid,
+    .included-layout {
+        grid-template-columns: 1fr;
+    }
+
+
+    .included-copy {
+        position: static;
+    }
+
+
+    .commission-process {
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+
+    .commission-cta {
+        flex-direction: column;
+
+        align-items: flex-start;
+    }
+
+}
+
+
+@media (max-width: 560px) {
+
+    .commission-pricing-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+    .addons-grid,
+    .commission-process,
+    .terms-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+    .addon-card {
+        grid-template-columns:
+            auto 1fr;
+    }
+
+
+    .addon-card > strong {
+        grid-column: 2;
+    }
+
+
+    .pricing-content {
+        padding: 23px;
+    }
+
+
+    .pricing-description {
+        min-height: auto;
+    }
+
+}
+
+/* =========================================================
+   TABELAS DE PREÇOS
+   ========================================================= */
+
+.commission-gallery-section {
+    padding-top: 35px;
+}
+
+.commission-sheets {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(260px, .7fr);
+    align-items: stretch;
+    gap: 24px;
+}
+
+.commission-sheet {
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    background: var(--surface);
+    box-shadow: 0 12px 38px rgba(74,45,54,.09);
+}
+
+.commission-sheet-main > a {
+    position: relative;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    background: #f8d4f1;
+}
+
+.commission-sheet-main img {
+    display: block;
+    width: 100%;
+    height: auto;
+    transition: transform .45s ease;
+}
+
+.commission-sheet-main > a:hover img {
+    transform: scale(1.015);
+}
+
+.sheet-zoom {
+    position: absolute;
+    right: 14px;
+    bottom: 14px;
+    padding: 9px 13px;
+    border: 1px solid rgba(255,255,255,.65);
+    border-radius: 999px;
+    background: rgba(50,25,55,.78);
+    color: white;
+    font-size: .78rem;
+    font-weight: 700;
+    opacity: 0;
+    transform: translateY(5px);
+    transition: opacity .2s ease, transform .2s ease;
+}
+
+.commission-sheet-main > a:hover .sheet-zoom,
+.commission-sheet-main > a:focus-visible .sheet-zoom {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.commission-sheet figcaption {
+    display: grid;
+    gap: 3px;
+    padding: 17px 20px 19px;
+}
+
+.commission-sheet figcaption strong {
+    color: var(--text, #38283d);
+    font-size: .98rem;
+}
+
+.commission-sheet figcaption span {
+    color: var(--muted);
+    font-size: .83rem;
+}
+
+.commission-sheet-placeholder {
+    min-height: 100%;
+    background: linear-gradient(155deg, #fffaff, #f9e6f5 58%, #eee7ff);
+}
+
+.sheet-placeholder-art {
+    position: relative;
+    min-height: 260px;
+    flex: 1;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    color: var(--accent-dark);
+    background-image: radial-gradient(rgba(210,143,221,.23) 1px, transparent 1px);
+    background-size: 18px 18px;
+}
+
+.sheet-placeholder-art::before,
+.sheet-placeholder-art::after {
+    content: "";
+    position: absolute;
+    width: 190px;
+    height: 190px;
+    border: 1px solid rgba(177,116,194,.19);
+    border-radius: 50%;
+}
+
+.sheet-placeholder-art::after {
+    width: 250px;
+    height: 250px;
+}
+
+.sheet-placeholder-art > span {
+    z-index: 1;
+    display: grid;
+    width: 76px;
+    height: 76px;
+    place-items: center;
+    border: 1px solid rgba(177,116,194,.3);
+    border-radius: 24px;
+    background: rgba(255,255,255,.78);
+    font-size: 2.2rem;
+    box-shadow: 0 12px 30px rgba(74,45,54,.08);
+}
+
+.sheet-placeholder-art i,
+.sheet-placeholder-art b {
+    position: absolute;
+    font-style: normal;
+    font-size: 1.6rem;
+    opacity: .75;
+}
+
+.sheet-placeholder-art i { top: 24%; left: 20%; }
+.sheet-placeholder-art b { right: 19%; bottom: 22%; }
+
+.sheet-placeholder-copy {
+    padding: 24px 25px 28px;
+}
+
+.sheet-placeholder-copy h3 {
+    margin: 8px 0;
+    font-size: 1.45rem;
+}
+
+.sheet-placeholder-copy p {
+    margin: 0;
+    color: var(--muted);
+    font-size: .92rem;
+    line-height: 1.7;
+}
+
+.placeholder-note {
+    display: inline-flex;
+    margin-top: 17px;
+    padding: 7px 11px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.76);
+    color: var(--accent-dark);
+    font-size: .76rem;
+    font-weight: 800;
+}
+
+@media (max-width: 760px) {
+    .commission-sheets {
+        grid-template-columns: 1fr;
+    }
+
+    .commission-sheet-placeholder {
+        min-height: 0;
+    }
+
+    .sheet-placeholder-art {
+        min-height: 220px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .commission-sheet-main img,
+    .sheet-zoom {
+        transition: none;
+    }
+}

@@ -1,0 +1,351 @@
+/* =========================================================
+   ANIMAÇÕES BASE
+   ========================================================= */
+
+@keyframes fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes float-soft {
+    0%,
+    100% {
+        transform: translateY(0) rotate(0);
+    }
+
+    50% {
+        transform: translateY(-8px) rotate(1deg);
+    }
+}
+
+@keyframes pulse-glow {
+    0%,
+    100% {
+        box-shadow: 0 0 0 rgba(236, 169, 195, 0);
+    }
+
+    50% {
+        box-shadow: 0 10px 28px rgba(236, 169, 195, .28);
+    }
+}
+
+
+/* =========================================================
+   ENTRADA AO ROLAR A PÁGINA
+   ========================================================= */
+
+.page-enter {
+    animation: fade-up .65s var(--ease) both;
+}
+
+.reveal {
+    opacity: 0;
+    transform: translateY(22px);
+
+    transition:
+        opacity .7s var(--ease),
+        transform .7s var(--ease);
+}
+
+.reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.delay-1 {
+    transition-delay: .08s;
+}
+
+.delay-2 {
+    transition-delay: .16s;
+}
+
+.delay-3 {
+    transition-delay: .24s;
+}
+
+.delay-4 {
+    transition-delay: .32s;
+}
+
+.delay-5 {
+    transition-delay: .40s;
+}
+
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.hero-content > * {
+    opacity: 0;
+    animation: fade-up .75s var(--ease) forwards;
+}
+
+.hero-content > *:nth-child(1) {
+    animation-delay: .08s;
+}
+
+.hero-content > *:nth-child(2) {
+    animation-delay: .18s;
+}
+
+
+/* =========================================================
+   ELEMENTOS DECORATIVOS
+   Use class="float-soft" onde quiser movimento leve
+   ========================================================= */
+
+.float-soft {
+    animation: float-soft 5s ease-in-out infinite;
+}
+
+.pulse-glow {
+    animation: pulse-glow 3.8s ease-in-out infinite;
+}
+
+
+/* =========================================================
+   CARDS
+   ========================================================= */
+
+.card-hover,
+.gallery-card,
+.gallery-item,
+.commission-card {
+    transition:
+        transform .35s var(--ease),
+        box-shadow .35s var(--ease),
+        border-color .35s var(--ease);
+}
+
+.card-hover:hover,
+.gallery-card:hover,
+.gallery-item:hover,
+.commission-card:hover {
+    border-color: var(--accent);
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-6px);
+}
+
+
+/* =========================================================
+   IMAGENS
+   ========================================================= */
+
+.gallery-card-image,
+.gallery-image-button,
+.image-zoom {
+    overflow: hidden;
+}
+
+.gallery-card-image img,
+.gallery-image,
+.image-zoom img {
+    transition: transform .65s var(--ease);
+}
+
+.gallery-card:hover img,
+.gallery-item:hover .gallery-image,
+.image-zoom:hover img {
+    transform: scale(1.035);
+}
+
+
+/* =========================================================
+   BRILHO NAS ARTES
+   ========================================================= */
+
+.gallery-card,
+.gallery-item {
+    position: relative;
+    isolation: isolate;
+}
+
+.gallery-card::after,
+.gallery-item::after {
+    content: "";
+
+    position: absolute;
+    z-index: 2;
+    inset: 0;
+
+    pointer-events: none;
+
+    background:
+        linear-gradient(
+            115deg,
+            transparent 35%,
+            rgba(255, 255, 255, .42) 50%,
+            transparent 65%
+        );
+
+    opacity: 0;
+    transform: translateX(-110%);
+    transition:
+        opacity .25s ease,
+        transform .7s var(--ease);
+}
+
+.gallery-card:hover::after,
+.gallery-item:hover::after {
+    opacity: 1;
+    transform: translateX(110%);
+}
+
+
+/* =========================================================
+   SPOTLIGHT DA GALERIA
+   Requer a classe .spotlight e o spotlight.js
+   ========================================================= */
+
+.spotlight {
+    --mouse-x: 50%;
+    --mouse-y: 50%;
+}
+
+.spotlight::before {
+    content: "";
+
+    position: absolute;
+    z-index: 3;
+    inset: 0;
+
+    pointer-events: none;
+
+    opacity: 0;
+
+    background:
+        radial-gradient(
+            180px circle at var(--mouse-x) var(--mouse-y),
+            rgba(255, 255, 255, .22),
+            transparent 65%
+        );
+
+    transition: opacity .25s ease;
+}
+
+.spotlight:hover::before {
+    opacity: 1;
+}
+
+
+/* =========================================================
+   OVERLAY DA GALERIA
+   ========================================================= */
+
+.gallery-overlay {
+    position: absolute;
+    z-index: 4;
+    inset: auto 0 0;
+
+    padding: 70px 22px 22px;
+
+    background:
+        linear-gradient(
+            to top,
+            rgba(55, 38, 49, .84),
+            rgba(55, 38, 49, .28),
+            transparent
+        );
+
+    color: white;
+
+    opacity: 0;
+    transform: translateY(10px);
+
+    transition:
+        opacity .3s ease,
+        transform .35s var(--ease);
+}
+
+.gallery-item:hover .gallery-overlay {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.arrow-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.arrow-link span {
+    transition: transform var(--transition);
+}
+
+.arrow-link:hover span {
+    transform: translateX(4px);
+}
+
+
+/* =========================================================
+   BOTÕES
+   ========================================================= */
+
+.button {
+    position: relative;
+    overflow: hidden;
+
+    transition:
+        transform var(--transition),
+        box-shadow var(--transition),
+        background var(--transition);
+}
+
+.button:hover {
+    transform: translateY(-3px);
+}
+
+.button::before {
+    content: "";
+
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+
+    width: 38%;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 255, 255, .32),
+            transparent
+        );
+
+    transform: translateX(-180%) skewX(-18deg);
+    transition: transform .6s var(--ease);
+}
+
+.button:hover::before {
+    transform: translateX(430%) skewX(-18deg);
+}
+
+
+/* =========================================================
+   REDUÇÃO DE MOVIMENTO
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+    }
+
+    .reveal {
+        opacity: 1;
+        transform: none;
+    }
+}

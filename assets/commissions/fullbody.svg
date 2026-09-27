@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 750">
+    <rect width="1000" height="750" fill="#f7dfe3"/>
+    <rect x="120" y="90" width="760" height="570" rx="28" fill="#fff" opacity=".55"/>
+    <text x="500" y="350" text-anchor="middle" font-family="Trebuchet MS, sans-serif" font-size="52" font-weight="800" fill="#786b71">Corpo inteiro</text>
+    <text x="500" y="410" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" letter-spacing="3" fill="#9a7b84">EXEMPLO DE COMISSÃO</text>
+    </svg>

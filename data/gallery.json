@@ -1,0 +1,58 @@
+[
+  {
+    "id": 1,
+    "title": "Personagem em destaque",
+    "category": "personagem",
+    "description": "Exemplo de character art.",
+    "year": "2026"
+  },
+  {
+    "id": 2,
+    "title": "Ilustração colorida",
+    "category": "ilustracao",
+    "description": "Exemplo de ilustração finalizada.",
+    "year": "2026"
+  },
+  {
+    "id": 3,
+    "title": "Fanart",
+    "category": "fanart",
+    "description": "Exemplo de fanart.",
+    "year": "2026"
+  },
+  {
+    "id": 4,
+    "title": "Comissão de personagem",
+    "category": "comissao",
+    "description": "Exemplo de trabalho realizado para cliente.",
+    "year": "2026"
+  },
+  {
+    "id": 5,
+    "title": "Original character",
+    "category": "personagem",
+    "description": "Exemplo de personagem original.",
+    "year": "2026"
+  },
+  {
+    "id": 6,
+    "title": "Cena ilustrada",
+    "category": "ilustracao",
+    "description": "Exemplo de cena ilustrada.",
+    "year": "2026"
+  },
+  {
+    "id": 7,
+    "title": "Fanart especial",
+    "category": "fanart",
+    "description": "Exemplo de fanart especial.",
+    "year": "2026"
+  },
+  {
+    "id": 8,
+    "title": "Comissão personalizada",
+    "category": "comissao",
+    "description": "Exemplo de comissão personalizada.",
+    "year": "2026"
+  }
+]

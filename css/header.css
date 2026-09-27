@@ -1,0 +1,644 @@
+.site-header {
+    position: sticky;
+    z-index: 1000;
+    top: 0;
+
+    height: 78px;
+
+    border-bottom: 1px solid var(--line);
+
+    background: rgba(255, 250, 253, .9);
+    box-shadow: 0 6px 22px rgba(104, 68, 93, .06);
+
+    backdrop-filter: blur(16px);
+}
+
+.header-inner {
+    width: min(var(--max), calc(100% - 40px));
+    height: 100%;
+    margin: 0 auto;
+
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.brand {
+    position: relative;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+
+    color: var(--text);
+}
+
+.brand::before {
+    content: "";
+
+    position: absolute;
+    z-index: -1;
+    inset: -12px -18px;
+
+    border-radius: 999px;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(236, 169, 195, .32),
+            transparent 70%
+        );
+
+    opacity: .65;
+    transition: opacity var(--transition);
+}
+
+.brand:hover::before {
+    opacity: 1;
+}
+
+.brand-mark {
+    display: grid;
+    place-items: center;
+
+    width: 42px;
+    height: 42px;
+
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--accent-soft),
+            var(--accent-purple-soft)
+        );
+
+    color: var(--accent-dark);
+    font-size: 1.15rem;
+
+    box-shadow: 0 5px 16px rgba(236, 169, 195, .25);
+
+    transition:
+        transform .4s var(--ease),
+        box-shadow .4s var(--ease);
+}
+
+.brand:hover .brand-mark {
+    box-shadow: 0 8px 24px rgba(236, 169, 195, .4);
+    transform: rotate(12deg) scale(1.08);
+}
+
+.brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+}
+
+.brand-text strong {
+    background:
+        linear-gradient(
+            90deg,
+            var(--accent-dark),
+            var(--accent-purple)
+        );
+
+    -webkit-background-clip: text;
+    background-clip: text;
+
+    color: transparent;
+
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 900;
+    letter-spacing: -.03em;
+}
+
+.brand-text small {
+    margin-top: 5px;
+
+    color: var(--muted);
+
+    font-size: .56rem;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+.main-nav {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+
+    margin-left: auto;
+}
+
+.main-nav a {
+    position: relative;
+
+    padding: 8px 0;
+
+    color: var(--text-soft);
+
+    font-size: .8rem;
+    font-weight: 750;
+
+    transition: color var(--transition);
+}
+
+.main-nav a:hover,
+.main-nav a.active {
+    color: var(--accent-dark);
+}
+
+.main-nav a::after {
+    content: "";
+
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+
+    height: 2px;
+
+    border-radius: 999px;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--accent),
+            var(--accent-purple)
+        );
+
+    transform: scaleX(0);
+    transition: transform var(--transition);
+}
+
+.main-nav a:hover::after,
+.main-nav a.active::after {
+    transform: scaleX(1);
+}
+
+.menu-toggle {
+    display: none;
+}
+
+@media (max-width: 720px) {
+    .site-header {
+        height: 70px;
+    }
+
+    .header-inner {
+        width: calc(100% - 28px);
+    }
+
+    .main-nav {
+        position: fixed;
+
+        top: 82px;
+        right: 14px;
+        left: 14px;
+
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 4px;
+
+        padding: 12px;
+
+        border: 1px solid var(--line);
+        border-radius: 18px;
+
+        background: rgba(255, 250, 253, .96);
+        box-shadow: var(--shadow);
+
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+
+        transform: translateY(-10px);
+        transition:
+            opacity var(--transition),
+            visibility var(--transition),
+            transform var(--transition);
+    }
+
+    .site-header.menu-open .main-nav {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transform: translateY(0);
+    }
+
+    .main-nav a {
+        padding: 12px 14px;
+        border-radius: 10px;
+    }
+
+    .main-nav a:hover {
+        background: var(--accent-soft);
+    }
+
+    .main-nav a::after {
+        display: none;
+    }
+
+    .menu-toggle {
+        display: grid;
+        place-items: center;
+
+        width: 42px;
+        height: 42px;
+        margin-left: auto;
+
+        border: 1px solid var(--line);
+        border-radius: 12px;
+
+        background: var(--surface);
+        color: var(--accent-dark);
+        font-size: 1.15rem;
+    }
+
+    .brand-text small {
+        display: none;
+    }
+}
+
+
+.site-header {
+    height: 82px;
+    border-bottom-color: rgba(185, 95, 135, .28);
+    background: rgba(255, 246, 251, .86);
+    box-shadow: 0 8px 28px rgba(104, 68, 93, .1);
+}
+
+.header-inner {
+    gap: 28px;
+}
+
+.brand {
+    gap: 12px;
+}
+
+.brand::before {
+    background:
+        radial-gradient(
+            circle,
+            rgba(232, 155, 189, .42),
+            transparent 70%
+        );
+    opacity: .85;
+}
+
+.brand-mark {
+    width: 48px;
+    height: 48px;
+    box-shadow: 0 7px 22px rgba(185, 95, 135, .24);
+    font-size: 1.25rem;
+}
+
+.brand-text strong {
+    font-size: 1.16rem;
+}
+
+.main-nav {
+    gap: 30px;
+}
+
+.main-nav a {
+    font-size: .84rem;
+    font-weight: 800;
+}
+
+.main-nav a::after {
+    height: 3px;
+}
+
+@media (max-width: 720px) {
+    .site-header {
+        height: 70px;
+    }
+}
+
+.site-header {
+    background: rgba(255, 249, 253, .72);
+    border-bottom-color: rgba(185, 95, 135, .24);
+    box-shadow: 0 8px 28px rgba(104, 68, 93, .08);
+
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+
+
+/* =========================================================
+   CABEÇALHO — IDENTIDADE ROSA + LILÁS
+   Camada final para manter as regras existentes e apenas
+   reforçar a integração visual com o rodapé.
+   ========================================================= */
+
+.site-header {
+    height: 82px;
+    isolation: isolate;
+
+    border-bottom-color: rgba(185, 95, 135, .26);
+
+    background:
+        linear-gradient(
+            100deg,
+            rgba(255, 243, 249, .9),
+            rgba(247, 235, 250, .84)
+        );
+
+    box-shadow:
+        0 10px 30px rgba(104, 68, 93, .1);
+}
+
+.site-header::after {
+    content: "";
+
+    position: absolute;
+    right: 0;
+    bottom: -1px;
+    left: 0;
+
+    height: 2px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            var(--accent),
+            var(--accent-purple),
+            transparent
+        );
+
+    opacity: .78;
+    pointer-events: none;
+}
+
+.header-inner {
+    gap: 32px;
+}
+
+.brand {
+    gap: 13px;
+}
+
+.brand::before {
+    inset: -16px -24px;
+
+    background:
+        radial-gradient(
+            circle at 25% 50%,
+            rgba(235, 157, 199, .48),
+            transparent 60%
+        ),
+        radial-gradient(
+            circle at 85% 50%,
+            rgba(176, 132, 226, .36),
+            transparent 64%
+        );
+
+    opacity: .9;
+}
+
+.brand-mark {
+    width: 50px;
+    height: 50px;
+
+    border-color: rgba(185, 95, 135, .56);
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--accent-soft),
+            var(--accent-purple-soft)
+        );
+
+    box-shadow:
+        0 8px 24px rgba(185, 95, 135, .23),
+        0 0 0 5px rgba(232, 155, 189, .1);
+}
+
+.brand-text strong {
+    font-size: 1.18rem;
+    text-shadow: 0 5px 18px rgba(185, 95, 135, .14);
+}
+
+.brand-text small {
+    letter-spacing: .12em;
+}
+
+.main-nav {
+    gap: 18px;
+}
+
+.main-nav a {
+    padding: 10px 12px;
+    border-radius: 999px;
+
+    color: var(--text-soft);
+    font-size: .83rem;
+    font-weight: 800;
+
+    transition:
+        color var(--transition),
+        background var(--transition),
+        transform var(--transition),
+        box-shadow var(--transition);
+}
+
+.main-nav a::after {
+    right: 12px;
+    bottom: 5px;
+    left: 12px;
+    height: 2px;
+}
+
+.main-nav a:hover {
+    color: var(--accent-dark);
+    background: rgba(245, 205, 221, .36);
+    transform: translateY(-2px);
+}
+
+.main-nav a.active {
+    color: var(--accent-dark);
+
+    background:
+        linear-gradient(
+            100deg,
+            rgba(245, 205, 221, .72),
+            rgba(236, 229, 248, .72)
+        );
+
+    box-shadow: 0 5px 16px rgba(185, 95, 135, .12);
+}
+
+.main-nav a.active::after {
+    transform: scaleX(1);
+}
+
+.menu-toggle {
+    border-color: rgba(185, 95, 135, .3);
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(245, 205, 221, .86),
+            rgba(236, 229, 248, .9)
+        );
+
+    box-shadow: 0 6px 18px rgba(185, 95, 135, .14);
+    transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.menu-toggle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(185, 95, 135, .22);
+}
+
+@media (max-width: 720px) {
+    .site-header {
+        height: 70px;
+    }
+
+    .header-inner {
+        width: calc(100% - 28px);
+        gap: 16px;
+    }
+
+    .brand-mark {
+        width: 43px;
+        height: 43px;
+        font-size: 1.05rem;
+    }
+
+    .brand-text strong {
+        font-size: 1.05rem;
+    }
+
+    .main-nav {
+        top: 78px;
+        gap: 4px;
+
+        border-color: rgba(185, 95, 135, .22);
+
+        background:
+            linear-gradient(
+                135deg,
+                rgba(255, 243, 249, .97),
+                rgba(247, 235, 250, .97)
+            );
+
+        box-shadow: 0 16px 35px rgba(104, 68, 93, .16);
+    }
+
+    .main-nav a {
+        padding: 12px 14px;
+        border-radius: 12px;
+    }
+
+    .main-nav a.active {
+        background:
+            linear-gradient(
+                100deg,
+                rgba(245, 205, 221, .78),
+                rgba(236, 229, 248, .78)
+            );
+    }
+
+    .menu-toggle {
+        width: 44px;
+        height: 44px;
+    }
+}
+
+
+/* =========================================================
+   CABEÇALHO — BRILHO DISTRIBUÍDO NO FUNDO
+   A logo e a navegação ficam leves; o destaque passa a
+   ocupar todo o cabeçalho com manchas rosa e lilás.
+   ========================================================= */
+
+.site-header {
+    background:
+        linear-gradient(
+            100deg,
+            rgba(255, 243, 249, .86),
+            rgba(247, 235, 250, .8)
+        );
+}
+
+.site-header::before {
+    content: "";
+
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+
+    background:
+        radial-gradient(
+            circle at 12% 40%,
+            rgba(241, 90, 178, 0.555),
+            transparent 50%
+        ),
+        radial-gradient(
+            circle at 90% 62%,
+            rgba(112, 61, 184, 0.671),
+            transparent 50%
+        );
+
+    filter: blur(2px);
+    opacity: .95;
+    pointer-events: none;
+}
+
+.brand::before,
+.brand:hover::before {
+    opacity: 0;
+}
+
+.brand-mark {
+    border-color: rgba(185, 95, 135, .46);
+
+    background: rgba(255, 255, 255, .22);
+
+    box-shadow: 0 0 0 3px rgba(232, 155, 189, .08);
+}
+
+.brand:hover .brand-mark {
+    box-shadow: 0 0 0 4px rgba(232, 155, 189, .14);
+}
+
+.main-nav a,
+.main-nav a:hover,
+.main-nav a.active {
+    background: transparent;
+    box-shadow: none;
+}
+
+.main-nav a:hover {
+    transform: translateY(-1px);
+}
+
+.menu-toggle {
+    background: rgba(255, 255, 255, .2);
+    box-shadow: none;
+}
+
+.menu-toggle:hover {
+    background: rgba(255, 255, 255, .34);
+    box-shadow: none;
+}
+
+@media (max-width: 720px) {
+    .main-nav a.active,
+    .main-nav a:hover {
+        background: rgba(255, 255, 255, .24);
+    }
+}
+
+/* Acesso da equipe às artistas */
+.main-nav .artist-access-link { color: #fff; background: linear-gradient(110deg, #c94f91, #8e62bb); box-shadow: 0 5px 15px rgba(143, 77, 151, .2); }
+.main-nav .artist-access-link:hover { color: #fff; background: linear-gradient(110deg, #bb4385, #8051ae); box-shadow: 0 8px 20px rgba(143, 77, 151, .28); }
+.main-nav .artist-access-link::after { display: none; }

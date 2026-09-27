@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Painel das artistas | Zoolixianas</title>
+    <link rel="icon" href="assets/branding/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/mobile.css">
+    <link rel="stylesheet" href="css/painel.css">
+</head>
+<body>
+<header class="site-header" id="site-header">
+    <div class="header-inner">
+        <a href="index.html" class="brand" aria-label="Voltar para a página inicial"><span class="brand-mark">✦</span><span class="brand-text"><strong>Zoolixianas</strong><small>Painel das artistas</small></span></a>
+        <nav class="main-nav" id="main-nav" aria-label="Navegação principal"><a href="index.html">Início</a><a href="status.html">Status público</a></nav>
+        <button class="menu-toggle" id="menu-toggle" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="main-nav">☰</button>
+    </div>
+</header>
+<main class="admin-main">
+    <section class="admin-heading"><span class="eyebrow">✦ Área privada</span><h1>Painel das artistas</h1><p>Atualize a disponibilidade e acompanhe os pedidos em um só lugar.</p></section>
+    <p class="admin-alert" id="backend-message" role="status">Conectando ao sistema…</p>
+    <p class="admin-message" id="auth-message" role="status" hidden></p>
+
+    <section class="admin-card auth-card" id="signin-panel">
+        <span class="eyebrow">Acesso seguro</span><h2>Entrar no painel</h2>
+        <p>Use sua conta individual e confirme o acesso pelo aplicativo autenticador.</p>
+        <form id="signin-form" class="admin-form">
+            <label for="signin-email">E-mail da artista</label><input id="signin-email" name="email" type="email" autocomplete="username" required>
+            <label for="signin-password">Senha</label><input id="signin-password" name="password" type="password" autocomplete="current-password" required>
+            <button class="button button-primary" type="submit">Continuar</button>
+        </form>
+        <button class="password-recovery-link" id="forgot-password" type="button">Esqueci minha senha</button>
+    </section>
+
+    <section class="admin-card auth-card" id="password-reset-panel" hidden>
+        <span class="eyebrow">Redefinir acesso</span><h2>Crie uma nova senha</h2>
+        <p>Escolha uma senha nova para sua conta das artistas.</p>
+        <form id="password-reset-form" class="admin-form">
+            <label for="new-password">Nova senha</label><input id="new-password" name="password" type="password" autocomplete="new-password" minlength="8" required>
+            <button class="button button-primary" type="submit">Salvar nova senha</button>
+        </form>
+    </section>
+
+    <section class="admin-card auth-card" id="mfa-panel" hidden>
+        <span class="eyebrow">Segundo fator</span><h2>Confirme no autenticador</h2>
+        <p>Digite o código temporário de seis dígitos do aplicativo autenticador.</p>
+        <form id="mfa-form" class="admin-form">
+            <label for="mfa-code">Código de verificação</label><input id="mfa-code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required>
+            <button class="button button-primary" type="submit">Verificar código</button>
+        </form>
+    </section>
+
+    <section class="admin-card auth-card" id="enroll-panel" hidden>
+        <span class="eyebrow">Primeiro acesso</span><h2>Conecte seu autenticador</h2>
+        <p>Escaneie o QR code com seu aplicativo autenticador. Depois, digite o código gerado para confirmar.</p>
+        <button class="button button-secondary" id="start-enroll" type="button">Gerar QR code</button>
+        <div id="enroll-details" hidden>
+            <img class="auth-qr" id="auth-qr" alt="QR code para configurar o autenticador">
+            <p class="auth-secret-label">Se não conseguir escanear, use esta chave no autenticador:</p><code id="auth-secret"></code>
+            <form id="enroll-form" class="admin-form">
+                <label for="enroll-code">Código do aplicativo</label><input id="enroll-code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required>
+                <button class="button button-primary" type="submit">Ativar e entrar</button>
+            </form>
+        </div>
+    </section>
+
+    <section class="admin-dashboard" id="admin-dashboard" hidden>
+        <div class="dashboard-top"><div><span class="eyebrow">Área privada</span><h2>Visão geral</h2></div><button class="button button-secondary" id="signout-button" type="button">Sair do painel</button></div>
+        <section class="admin-card">
+            <div class="card-heading"><div><span class="eyebrow">Página pública</span><h3>Disponibilidade das comissões</h3></div></div>
+            <form id="availability-form" class="availability-form">
+                <label for="availability-state">Situação</label><select id="availability-state" required><option value="open">Comissões abertas</option><option value="few">Poucas vagas</option><option value="closed">Comissões fechadas</option></select>
+                <label for="availability-slots">Vagas disponíveis</label><input id="availability-slots" type="number" min="0" max="99" value="0" required>
+                <label for="availability-note">Aviso público opcional</label><input id="availability-note" type="text" maxlength="180" placeholder="Ex.: pedidos para novembro">
+                <button class="button button-primary" type="submit">Salvar disponibilidade</button>
+            </form>
+        </section>
+        <section class="admin-card">
+            <div class="card-heading"><div><span class="eyebrow">Fila privada</span><h3>Pedidos</h3></div></div>
+            <form id="order-form" class="order-form">
+                <label for="order-client">Nome do cliente</label><input id="order-client" required maxlength="120">
+                <label for="order-contact">Contato privado</label><input id="order-contact" required maxlength="180" placeholder="E-mail ou @ de rede social">
+                <label for="order-type">Tipo de arte</label><input id="order-type" required maxlength="100" placeholder="Ex.: meio corpo renderizado">
+                <label for="order-summary">Resumo do pedido</label><textarea id="order-summary" required maxlength="1200" rows="3"></textarea>
+                <button class="button button-primary" type="submit">Adicionar pedido</button>
+            </form>
+            <p class="privacy-note">Os pedidos e contatos ficam privados e só aparecem após autenticação das artistas.</p>
+            <div class="orders-list" id="orders-list" aria-live="polite"></div>
+        </section>
+    </section>
+</main>
+<footer class="site-footer"><div class="footer-inner"><div class="footer-brand"><strong>Zoolixianas</strong><span>Painel privado das artistas</span><p>Gerencie a disponibilidade e a fila de comissões.</p></div><nav class="footer-links" aria-label="Links úteis"><a href="index.html">Início</a><a href="status.html">Status público</a><a href="commissions.html">Preços e detalhes</a></nav><div class="footer-cta"><span class="eyebrow">Precisa de ajuda?</span><p>Volte para a página pública do site.</p><a href="status.html" class="footer-button">Ver status público <span aria-hidden="true">↗</span></a></div></div></footer>
+<script src="js/navigation.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/backend-config.js"></script>
+<script src="js/admin-panel.js"></script>
+</body>
+</html>

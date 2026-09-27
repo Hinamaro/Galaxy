@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 650">
+    <rect width="1600" height="650" fill="#f7c8d3"/>
+    <circle cx="1250" cy="220" r="170" fill="#ffffff" opacity=".45"/>
+    <circle cx="1380" cy="400" r="110" fill="#ffffff" opacity=".35"/>
+    <text x="800" y="330" text-anchor="middle" font-family="Trebuchet MS, sans-serif" font-size="70" font-weight="800" fill="#786b71">BANNER 01</text>
+    <text x="800" y="390" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" letter-spacing="5" fill="#a88791">SUBSTITUA PELA SUA ARTE</text>
+    </svg>
