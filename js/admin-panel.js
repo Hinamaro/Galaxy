@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     const config = window.GALAXY_BACKEND;
     const backendMessage = document.querySelector("#backend-message");
     const authMessage = document.querySelector("#auth-message");
