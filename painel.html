@@ -38,8 +38,8 @@
     <p class="admin-message" id="auth-message" role="status" hidden></p>
 
     <section class="admin-card auth-card" id="signin-panel">
-        <span class="eyebrow">Acesso seguro</span><h2>Entrar no painel</h2>
-        <p>Use sua conta individual e confirme o acesso pelo aplicativo autenticador.</p>
+        <span class="eyebrow">Acesso privado</span><h2>Entrar no painel</h2>
+        <p>Entre com o e-mail e a senha da sua conta autorizada.</p>
         <form id="signin-form" class="admin-form">
             <label for="signin-email">E-mail da artista</label><input id="signin-email" name="email" type="email" autocomplete="username" required>
             <label for="signin-password">Senha</label><input id="signin-password" name="password" type="password" autocomplete="current-password" required>
@@ -55,29 +55,6 @@
             <label for="new-password">Nova senha</label><input id="new-password" name="password" type="password" autocomplete="new-password" minlength="8" required>
             <button class="button button-primary" type="submit">Salvar nova senha</button>
         </form>
-    </section>
-
-    <section class="admin-card auth-card" id="mfa-panel" hidden>
-        <span class="eyebrow">Segundo fator</span><h2>Confirme no autenticador</h2>
-        <p>Digite o código temporário de seis dígitos do aplicativo autenticador.</p>
-        <form id="mfa-form" class="admin-form">
-            <label for="mfa-code">Código de verificação</label><input id="mfa-code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required>
-            <button class="button button-primary" type="submit">Verificar código</button>
-        </form>
-    </section>
-
-    <section class="admin-card auth-card" id="enroll-panel" hidden>
-        <span class="eyebrow">Primeiro acesso</span><h2>Conecte seu autenticador</h2>
-        <p>Escaneie o QR code com seu aplicativo autenticador. Depois, digite o código gerado para confirmar.</p>
-        <button class="button button-secondary" id="start-enroll" type="button">Gerar QR code</button>
-        <div id="enroll-details" hidden>
-            <img class="auth-qr" id="auth-qr" alt="QR code para configurar o autenticador">
-            <p class="auth-secret-label">Se não conseguir escanear, use esta chave no autenticador:</p><code id="auth-secret"></code>
-            <form id="enroll-form" class="admin-form">
-                <label for="enroll-code">Código do aplicativo</label><input id="enroll-code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required>
-                <button class="button button-primary" type="submit">Ativar e entrar</button>
-            </form>
-        </div>
     </section>
 
     <section class="admin-dashboard" id="admin-dashboard" hidden>

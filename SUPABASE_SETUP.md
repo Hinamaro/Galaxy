@@ -5,7 +5,7 @@
 - Banco Supabase conectado ao site por URL e chave publicável.
 - Tabelas para disponibilidade pública e pedidos privados.
 - A disponibilidade começa fechada para não anunciar vagas por engano.
-- RLS habilitado: dados de pedidos só podem ser lidos ou alterados por artistas autorizadas com autenticador de dois fatores ativo.
+- As regras atuais ainda exigem autenticador de dois fatores. A versão sem autenticador está preparada, mas precisa da confirmação abaixo e da migração `supabase/remove-mfa.sql` antes de publicar o novo painel.
 
 ## O que falta antes do primeiro acesso
 
@@ -33,10 +33,9 @@
 ## Como as artistas usam o painel
 
 1. Clique em **Área das artistas** no menu ou rodapé do site para abrir `painel.html`. Entre com o e-mail e a senha da conta individual. Se necessário, use **Esqueci minha senha** para receber um link de recuperação no próprio e-mail.
-2. No primeiro acesso, clique para configurar o autenticador, escaneie o QR com um app como Google Authenticator, Microsoft Authenticator ou Authy e confirme o código de seis dígitos.
-3. Nos acessos seguintes, entre com e-mail e senha e confirme o código temporário.
-4. Em **Disponibilidade das comissões**, escolha abertas, poucas vagas ou fechadas; informe as vagas e um aviso que possa ser público; salve. A página pública de status reflete a mudança.
-5. Em **Pedidos**, registre nome, contato, tipo de arte e resumo. Depois, atualize a etapa do pedido no seletor da ficha.
+2. Na versão sem autenticador, basta entrar com e-mail e senha.
+3. Em **Disponibilidade das comissões**, escolha abertas, poucas vagas ou fechadas; informe as vagas e um aviso que possa ser público; salve. A página pública de status reflete a mudança.
+4. Em **Pedidos**, registre nome, contato, tipo de arte e resumo. Depois, atualize a etapa do pedido no seletor da ficha.
 
 Nome, contato e detalhes dos pedidos ficam privados para as artistas. O aviso de disponibilidade aparece publicamente: não coloque nele informação de cliente.
 
@@ -50,3 +49,7 @@ Nome, contato e detalhes dos pedidos ficam privados para as artistas. O aviso de
 ## Observações
 
 O acompanhamento individual por link para os clientes ainda não está disponível. O painel atual é privado e compartilhado pelas artistas. O domínio do site e as URLs de redirecionamento ainda precisam ser configurados quando vocês escolherem onde publicar.
+
+## Segurança sem autenticador
+
+Ao remover o segundo fator, uma senha válida e a autorização da conta passam a ser suficientes para acessar os dados privados dos pedidos. Mantenham senhas fortes e individuais e não compartilhem contas. A migração substitui apenas as políticas RLS do painel; não apaga pedidos nem usuários.
