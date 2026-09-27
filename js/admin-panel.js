@@ -162,11 +162,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         const { data, error } = await client.auth.mfa.enroll({ factorType: "totp", friendlyName: "Painel das comissões" });
         event.currentTarget.disabled = false;
         if (error) {
-            setMessage("Não foi possível iniciar a configuração do autenticador. Tente novamente.", true);
+            setMessage(`Não foi possível iniciar a configuração do autenticador: ${error.message || "erro desconhecido"}`, true);
+            return;
+        }
+        if (!data?.totp?.qr_code || !data?.totp?.secret) {
+            setMessage("O Supabase iniciou o autenticador, mas não retornou o QR code. Atualize a página e tente novamente.", true);
             return;
         }
         pendingFactorId = data.id;
-        document.querySelector("#auth-qr").src = data.totp.qr_code;
+        const qrMarkup = data.totp.qr_code;
+        document.querySelector("#auth-qr").src = qrMarkup.trimStart().startsWith("<svg")
+            ? `data:image/svg+xml;charset=utf-8,${encodeURIComponent(qrMarkup)}`
+            : qrMarkup;
         document.querySelector("#auth-secret").textContent = data.totp.secret;
         document.querySelector("#enroll-details").hidden = false;
         document.querySelector("#enroll-code").focus();
