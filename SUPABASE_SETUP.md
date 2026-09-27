@@ -5,7 +5,7 @@
 - Banco Supabase conectado ao site por URL e chave publicável.
 - Tabelas para disponibilidade pública e pedidos privados.
 - A disponibilidade começa fechada para não anunciar vagas por engano.
-- As regras atuais ainda exigem autenticador de dois fatores. A versão sem autenticador está preparada, mas precisa da confirmação abaixo e da migração `supabase/remove-mfa.sql` antes de publicar o novo painel.
+- As políticas do Supabase foram atualizadas: o painel aceita senha para as contas autorizadas, sem pedir autenticador.
 
 ## O que falta antes do primeiro acesso
 
@@ -50,6 +50,6 @@ Nome, contato e detalhes dos pedidos ficam privados para as artistas. O aviso de
 
 O acompanhamento individual por link para os clientes ainda não está disponível. O painel atual é privado e compartilhado pelas artistas. O domínio do site e as URLs de redirecionamento ainda precisam ser configurados quando vocês escolherem onde publicar.
 
-## Segurança sem autenticador
+## Segurança do painel
 
-Ao remover o segundo fator, uma senha válida e a autorização da conta passam a ser suficientes para acessar os dados privados dos pedidos. Mantenham senhas fortes e individuais e não compartilhem contas. A migração substitui apenas as políticas RLS do painel; não apaga pedidos nem usuários.
+Uma senha válida e a autorização da conta são suficientes para acessar os dados privados dos pedidos. Mantenham senhas fortes e individuais e não compartilhem contas. A migração substitui apenas as políticas RLS do painel; não apaga pedidos nem usuários.
