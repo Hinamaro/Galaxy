@@ -48,6 +48,16 @@
         </article>
         <p class="status-footnote">A disponibilidade pode mudar. O pedido só fica confirmado depois da conversa com a artista.</p>
     </section>
+    <section class="tracking-section" aria-labelledby="tracking-title">
+        <div class="tracking-intro"><span class="eyebrow">✦ Acompanhe sua arte</span><h2 id="tracking-title">Seu pedido, passo a passo</h2><p>Use o código que a artista compartilhou com você para consultar a etapa atual. Seus dados pessoais não aparecem nesta consulta.</p></div>
+        <form class="tracking-form" id="tracking-form">
+            <label for="tracking-code">Código do pedido</label>
+            <div class="tracking-input-row"><input id="tracking-code" name="code" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" maxlength="16" placeholder="Ex.: A1B2C3D4E5F60718" required><button class="button button-primary" type="submit">Consultar pedido</button></div>
+        </form>
+        <p class="tracking-message" id="tracking-message" role="status" aria-live="polite" hidden></p>
+        <article class="tracking-result" id="tracking-result" aria-live="polite" hidden></article>
+        <p class="tracking-privacy">A consulta mostra somente o tipo de arte e o andamento. Nome, contato e descrição do pedido ficam privados.</p>
+    </section>
 </main>
 <div class="artist-area-link"><a href="painel.html">Área das artistas <span aria-hidden="true">↗</span></a></div>
 <footer class="site-footer">

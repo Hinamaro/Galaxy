@@ -16,4 +16,23 @@
 .artist-area-link { width: min(900px, calc(100% - 36px)); margin: -48px auto 62px; text-align: right; }
 .artist-area-link a { color: var(--muted); font-size: .76rem; }
 .artist-area-link a:hover { color: var(--accent-dark); }
+.tracking-section { width: min(900px, calc(100% - 36px)); margin: 0 auto 88px; padding: clamp(24px, 5vw, 46px); border: 1px solid var(--line); border-radius: 26px; background: rgba(255,249,253,.78); box-shadow: 0 18px 50px rgba(84,52,84,.08); }
+.tracking-intro { text-align: center; }
+.tracking-intro h2 { margin: 8px 0; font-size: clamp(1.7rem, 4vw, 2.45rem); }
+.tracking-intro p { max-width: 620px; margin: 0 auto; color: var(--muted); line-height: 1.65; }
+.tracking-form { max-width: 650px; margin: 26px auto 0; }
+.tracking-form label { display: block; margin-bottom: 8px; color: var(--text-soft); font-size: .88rem; font-weight: 750; }
+.tracking-input-row { display: flex; gap: 10px; }
+.tracking-input-row input { flex: 1; min-width: 0; min-height: 50px; padding: 12px 15px; border: 1px solid var(--line); border-radius: 13px; background: white; color: var(--text); font: inherit; letter-spacing: .08em; }
+.tracking-input-row input:focus { outline: 3px solid rgba(185,95,135,.2); border-color: var(--accent-dark); }
+.tracking-message { max-width: 650px; margin: 16px auto 0; padding: 12px 15px; border-radius: 12px; background: #fff0f4; color: #963b5a; }
+.tracking-result { max-width: 650px; margin: 18px auto 0; padding: 22px; border: 1px solid var(--line); border-radius: 18px; background: white; }
+.tracking-result h3 { margin: 0 0 4px; }
+.tracking-result > p { margin: 0; color: var(--muted); }
+.tracking-timeline { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 20px; }
+.tracking-step { padding: 10px 8px; border-radius: 12px; background: #f3edf5; color: var(--muted); font-size: .75rem; text-align: center; }
+.tracking-step.is-current,.tracking-step.is-done { background: #fce7f2; color: var(--accent-dark); font-weight: 800; }
+.tracking-step.is-current { box-shadow: inset 0 0 0 1px rgba(185,95,135,.28); }
+.tracking-privacy { margin: 14px auto 0; color: var(--muted); font-size: .78rem; line-height: 1.55; text-align: center; }
 @media (max-width: 560px) { .status-section { width: calc(100% - 28px); } .status-card { padding: 30px 20px; border-radius: 22px; } .status-actions { flex-direction: column; align-items: stretch; } .artist-area-link { margin-top: -32px; } }
+@media (max-width: 560px) { .tracking-section { width: calc(100% - 28px); padding: 24px 18px; } .tracking-input-row { flex-direction: column; } .tracking-timeline { grid-template-columns: repeat(2, 1fr); } }

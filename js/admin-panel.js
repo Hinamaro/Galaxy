@@ -155,7 +155,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         container.setAttribute("aria-busy", "true");
         const { data, error } = await client
             .from("commission_orders")
-            .select("id, client_name, client_contact, art_type, summary, status, created_at")
+            .select("id, client_name, client_contact, art_type, summary, status, created_at, tracking_code")
             .order("created_at", { ascending: false });
         container.setAttribute("aria-busy", "false");
         if (error) {
@@ -182,7 +182,25 @@ document.addEventListener("DOMContentLoaded", async () => {
             const date = document.createElement("span");
             date.className = "order-date";
             date.textContent = new Date(order.created_at).toLocaleDateString("pt-BR");
-            details.append(heading, contact, type, summary, date);
+            const tracking = document.createElement("p");
+            tracking.className = "order-tracking-code";
+            tracking.textContent = `Código para o cliente: ${order.tracking_code || "Indisponível — aplique a atualização do Supabase"}`;
+            if (order.tracking_code) {
+                const copyCode = document.createElement("button");
+                copyCode.type = "button";
+                copyCode.className = "copy-tracking-code";
+                copyCode.textContent = "Copiar código";
+                copyCode.addEventListener("click", async () => {
+                    try {
+                        await navigator.clipboard.writeText(order.tracking_code);
+                        setMessage(`Código ${order.tracking_code} copiado para compartilhar com o cliente.`);
+                    } catch {
+                        setMessage(`Copie este código para o cliente: ${order.tracking_code}`);
+                    }
+                });
+                tracking.append(document.createTextNode(" "), copyCode);
+            }
+            details.append(heading, contact, type, summary, date, tracking);
 
             const select = document.createElement("select");
             select.setAttribute("aria-label", `Etapa do pedido de ${order.client_name}`);
@@ -205,7 +223,28 @@ document.addEventListener("DOMContentLoaded", async () => {
                     setMessage(`Etapa atualizada: ${select.selectedOptions[0].textContent}.`);
                 }
             });
-            row.append(details, select);
+            const controls = document.createElement("div");
+            controls.className = "order-controls";
+            controls.append(select);
+            const remove = document.createElement("button");
+            remove.type = "button";
+            remove.className = "button button-secondary order-delete";
+            remove.textContent = "Remover pedido";
+            remove.setAttribute("aria-label", `Remover pedido de ${order.client_name}`);
+            remove.addEventListener("click", async () => {
+                if (!window.confirm(`Remover permanentemente o pedido de ${order.client_name}?`)) return;
+                remove.disabled = true;
+                const { error: deleteError } = await client.from("commission_orders").delete().eq("id", order.id);
+                if (deleteError) {
+                    remove.disabled = false;
+                    setMessage("Não foi possível remover. Aplique a atualização de permissões no SQL Editor do Supabase e tente novamente.", true);
+                    return;
+                }
+                setMessage("Pedido removido.");
+                await loadOrders();
+            });
+            controls.append(remove);
+            row.append(details, controls);
             container.append(row);
         });
     }
@@ -220,13 +259,15 @@ document.addEventListener("DOMContentLoaded", async () => {
             summary: document.querySelector("#order-summary").value.trim(),
             status: "received"
         };
-        const { error } = await client.from("commission_orders").insert(fields);
+        const { data: newOrder, error } = await client.from("commission_orders").insert(fields).select("tracking_code").single();
         if (error) {
             setMessage("Não foi possível adicionar o pedido. Confira a conexão e a autenticação.", true);
             return;
         }
         form.reset();
-        setMessage("Pedido adicionado à fila privada.");
+        setMessage(newOrder?.tracking_code
+            ? `Pedido adicionado. Código de acompanhamento para enviar ao cliente: ${newOrder.tracking_code}`
+            : "Pedido adicionado à fila privada.");
         await loadOrders();
     });
 
