@@ -127,6 +127,30 @@
 .order-date,.order-last-updated { display: inline-block; margin: 4px 10px 2px 0; }
 .order-last-updated { padding: 3px 8px; border-radius: 999px; background: #f1ebf7; color: #796184; font-size: .69rem; font-weight: 700; }
 .order-last-updated.is-stale { background: #fff2e6; color: #936341; }
+.orders-attention:not([hidden]) { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 16px 0 8px; padding: 12px 15px; border: 1px solid #ecd2e1; border-radius: 13px; background: linear-gradient(100deg,#fff3f8,#f6effa); color: #83536f; font-size: .82rem; font-weight: 700; }
+.orders-attention button { padding: 6px 10px; border: 0; border-radius: 999px; background: #ead8f1; color: #704482; font: inherit; font-size: .75rem; font-weight: 800; }
+.orders-attention button:hover { background: #dec7e9; }
+.orders-toolbar { grid-template-columns: minmax(0,1fr) minmax(170px,.42fr) minmax(160px,.4fr); }
+.order-artist-assignment { width: fit-content; padding: 4px 9px; border-radius: 999px; background: #f2eaf8; color: #79558a !important; font-size: .73rem !important; font-weight: 750; }
+.order-history-details,.order-client-requests { margin-top: 10px; padding: 10px 12px; border: 1px solid rgba(220,190,224,.58); border-radius: 12px; background: rgba(255,255,255,.68); }
+.order-history-details summary,.order-client-requests summary { color: #79558a; font-size: .79rem; font-weight: 800; cursor: pointer; }
+.order-history-list { display: grid; gap: 5px; margin: 10px 0 0; padding-left: 20px; color: var(--muted); font-size: .76rem; }
+.client-request-card { display: grid; gap: 5px; margin-top: 10px; padding: 12px; border-radius: 10px; background: #f5f0f7; color: var(--text-soft); }
+.client-request-card.is-pending { border-left: 3px solid #c783ae; background: #fff2f8; }
+.client-request-card p { margin: 0; color: var(--muted); font-size: .84rem; white-space: pre-wrap; }
+.client-request-card small { color: var(--muted); font-size: .7rem; }
+.client-request-card .copy-tracking-code { justify-self: start; margin: 3px 0 0; }
+.copy-tracking-code { margin: 4px 4px 2px 0; }
+.export-orders-button { margin: 4px 0 6px; font-size: .76rem; }
+.gallery-consent-copy { max-width: 720px; color: var(--muted); font-size: .88rem; }
+.gallery-upload-form select { width: 100%; min-height: 48px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,.86); color: var(--text); font: inherit; }
+.consent-checkbox { grid-column: 2; display: flex; align-items: flex-start; gap: 10px; padding: 12px; border: 1px solid #e7cfe5; border-radius: 12px; background: #faf4fc; line-height: 1.5; }
+.consent-checkbox input { width: 19px; min-height: 19px; flex: 0 0 auto; margin: 2px 0 0; accent-color: #aa72b9; }
+.artist-gallery-list { display: grid; grid-template-columns: repeat(auto-fill,minmax(210px,1fr)); gap: 13px; margin-top: 20px; }
+.artist-gallery-item { display: grid; gap: 9px; padding: 12px; border: 1px solid var(--line); border-radius: 15px; background: white; }
+.artist-gallery-item img { width: 100%; height: 145px; border-radius: 10px; object-fit: cover; }
+.artist-gallery-item > div { display: grid; gap: 3px; }
+.artist-gallery-item span { color: var(--muted); font-size: .74rem; }
 @media (max-width: 650px) {
     .admin-main { width: calc(100% - 28px); }
     .dashboard-top { padding: 18px; border-radius: 18px; }
@@ -140,6 +164,7 @@
     .order-controls > select,.order-estimate-control { grid-column: 1 / -1; }
     .order-estimate-control { grid-template-columns: 1fr minmax(125px,.8fr); align-items: center; }
     .order-estimate-control label { font-size: .74rem; }
+    .consent-checkbox { grid-column: 1; }
     .order-row .order-delete { justify-self: end; min-height: 34px; white-space: nowrap; }
     .order-row h4 { display: block; margin-bottom: 8px; }
     .order-row .order-status-badge { margin-bottom: 3px; }

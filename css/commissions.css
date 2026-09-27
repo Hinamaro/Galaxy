@@ -882,3 +882,13 @@
         transition: none;
     }
 }
+
+.commission-faq { padding-top: 55px; }
+.faq-list { width: min(820px, 100%); display: grid; gap: 11px; margin: 0 auto; }
+.faq-item { overflow: hidden; border: 1px solid rgba(222,178,211,.8); border-radius: 16px; background: linear-gradient(120deg, rgba(255,249,252,.94), rgba(246,239,250,.92)); box-shadow: 0 7px 20px rgba(74,45,84,.045); }
+.faq-item summary { position: relative; padding: 17px 50px 17px 19px; color: var(--text); font-weight: 750; cursor: pointer; list-style: none; }
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after { position: absolute; top: 50%; right: 19px; color: var(--accent-dark); content: "+"; font-size: 1.25rem; transform: translateY(-50%); }
+.faq-item[open] summary::after { content: "−"; }
+.faq-item > p { margin: 0; padding: 0 19px 18px; color: var(--muted); font-size: .9rem; line-height: 1.7; }
+.faq-item > p a { color: var(--accent-dark); font-weight: 750; text-decoration: underline; text-underline-offset: 3px; }

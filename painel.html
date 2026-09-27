@@ -75,11 +75,13 @@
                 <label for="order-contact">Contato privado</label><input id="order-contact" required maxlength="180" placeholder="E-mail ou @ de rede social">
                 <label for="order-type">Tipo de arte</label><input id="order-type" required maxlength="100" placeholder="Ex.: meio corpo renderizado">
                 <label for="order-summary">Resumo do pedido</label><textarea id="order-summary" required maxlength="1200" rows="3"></textarea>
+                <label for="order-artist">Artista responsável</label><select id="order-artist"><option value="Sem atribuição">Sem atribuição</option><option value="Ynnley">Ynnley</option><option value="Bonny">Bonny</option></select>
                 <label for="order-estimate">Previsão de entrega (opcional)</label><input id="order-estimate" type="date" aria-describedby="estimate-help">
                 <span class="form-help" id="estimate-help">A previsão só aparece na consulta do cliente quando você escolher uma data.</span>
                 <button class="button button-primary" type="submit">Adicionar pedido</button>
             </form>
             <p class="privacy-note">Nome, contato e resumo ficam privados. O código compartilhado mostra ao cliente apenas o tipo de arte, a etapa e uma previsão, se informada.</p>
+            <p class="orders-attention" id="orders-attention" role="status" hidden></p>
             <div class="orders-overview" id="orders-overview" aria-label="Resumo de pedidos"></div>
             <div class="orders-toolbar">
                 <label class="sr-only" for="orders-search">Buscar por cliente ou código</label>
@@ -87,14 +89,32 @@
                 <label class="sr-only" for="orders-filter">Filtrar pedidos por etapa</label>
                 <select id="orders-filter">
                     <option value="all">Todas as etapas</option>
+                    <option value="stale">Sem atualização há 7+ dias</option>
                     <option value="received">Pedido recebido</option><option value="quote">Orçamento enviado</option>
                     <option value="payment">Aguardando pagamento</option><option value="queue">Na fila</option>
                     <option value="sketch">Esboço</option><option value="approval">Aguardando aprovação</option>
                     <option value="finalizing">Finalização</option><option value="delivered">Entregue</option>
                     <option value="cancelled">Cancelado</option>
                 </select>
+                <label class="sr-only" for="orders-artist-filter">Filtrar pedidos por artista</label>
+                <select id="orders-artist-filter"><option value="all">Todas as artistas</option><option value="Ynnley">Ynnley</option><option value="Bonny">Bonny</option><option value="Sem atribuição">Sem atribuição</option></select>
             </div>
+            <button class="button button-secondary export-orders-button" id="export-orders" type="button">Baixar backup da fila (.CSV)</button>
             <div class="orders-list" id="orders-list" aria-live="polite"></div>
+        </section>
+        <section class="admin-card" aria-labelledby="gallery-upload-title">
+            <div class="card-heading"><div><span class="eyebrow">Portfólio público</span><h3 id="gallery-upload-title">Compartilhar uma arte concluída</h3></div></div>
+            <p class="gallery-consent-copy">Publique somente trabalhos concluídos e com autorização expressa do cliente. A arte ficará visível na galeria pública.</p>
+            <form class="order-form gallery-upload-form" id="gallery-upload-form">
+                <label for="gallery-order">Pedido entregue</label><select id="gallery-order" required><option value="">Escolha um pedido concluído</option></select>
+                <label for="gallery-title">Título</label><input id="gallery-title" maxlength="120" required placeholder="Ex.: Personagem da Lua">
+                <label for="gallery-category">Categoria</label><select id="gallery-category"><option value="character">Personagens</option><option value="fanart">Fanarts</option><option value="oc">OCs</option><option value="illustration">Ilustrações</option></select>
+                <label for="gallery-image">Imagem da arte</label><input id="gallery-image" type="file" accept="image/png,image/jpeg,image/webp" required>
+                <span class="form-help">PNG, JPG ou WebP, até 8 MB. A imagem será pública.</span>
+                <label class="consent-checkbox"><input id="gallery-consent" type="checkbox" required><span>Confirmo que recebi autorização expressa do cliente para publicar esta arte no portfólio.</span></label>
+                <button class="button button-primary" type="submit">Publicar na galeria</button>
+            </form>
+            <div class="artist-gallery-list" id="artist-gallery-list" aria-live="polite"></div>
         </section>
     </section>
 </main>

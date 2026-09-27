@@ -70,11 +70,11 @@ document.addEventListener("DOMContentLoaded", () => {
         previousFocus?.focus();
     }
 
-    triggers().forEach(trigger => {
-        trigger.addEventListener("click", event => {
-            event.preventDefault();
-            openLightbox(trigger);
-        });
+    document.addEventListener("click", event => {
+        const trigger = event.target.closest?.("[data-lightbox-trigger]");
+        if (!trigger) return;
+        event.preventDefault();
+        openLightbox(trigger);
     });
 
     closeButton.addEventListener("click", closeLightbox);

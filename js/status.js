@@ -10,6 +10,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     const trackingCode = document.querySelector("#tracking-code");
     const trackingMessage = document.querySelector("#tracking-message");
     const trackingResult = document.querySelector("#tracking-result");
+    const trackingRequest = document.querySelector("#tracking-request");
+    const clientRequestForm = document.querySelector("#client-request-form");
+    const clientRequestMessage = document.querySelector("#tracking-request-message");
+    let activeTrackingCode = "";
     const orderStatuses = [
         ["received", "Pedido recebido"], ["quote", "Orçamento"], ["payment", "Pagamento"],
         ["queue", "Na fila"], ["sketch", "Esboço"], ["approval", "Aprovação"],
@@ -80,12 +84,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
-    trackingForm.addEventListener("submit", async event => {
-        event.preventDefault();
+    async function lookupOrder(rawCode) {
         trackingMessage.hidden = true;
         trackingResult.hidden = true;
         trackingResult.replaceChildren();
-        const code = trackingCode.value.trim().replace(/[^a-f\d]/gi, "").toUpperCase();
+        trackingRequest.hidden = true;
+        const code = rawCode.trim().replace(/[^a-f\d]/gi, "").toUpperCase();
+        activeTrackingCode = code;
         if (!client) {
             trackingMessage.textContent = "A consulta está temporariamente indisponível. Tente novamente mais tarde.";
             trackingMessage.classList.add("is-error");
@@ -157,11 +162,62 @@ document.addEventListener("DOMContentLoaded", async () => {
             });
             trackingResult.append(heading, subtitle, explanation, updated, estimate, timeline);
         } else trackingResult.append(heading, subtitle, explanation, updated, estimate);
+        if (Array.isArray(order.history) && order.history.length) {
+            const historySection = document.createElement("section");
+            historySection.className = "tracking-history";
+            const historyTitle = document.createElement("h4");
+            historyTitle.textContent = "Movimentações do pedido";
+            const historyList = document.createElement("ol");
+            order.history.forEach(item => {
+                const entry = document.createElement("li");
+                const label = orderStatuses.find(([value]) => value === item.status)?.[1] || (item.status === "cancelled" ? "Cancelado" : "Atualização");
+                const time = new Date(item.changed_at).toLocaleString("pt-BR", { dateStyle: "medium", timeStyle: "short" });
+                entry.textContent = `${label} · ${time}`;
+                historyList.append(entry);
+            });
+            historySection.append(historyTitle, historyList);
+            trackingResult.append(historySection);
+        }
         const contactLink = document.createElement("a");
         contactLink.className = "button button-secondary tracking-contact-link";
         contactLink.href = "contact.html";
         contactLink.textContent = "Falar com as artistas";
         trackingResult.append(contactLink);
         trackingResult.hidden = false;
+        trackingRequest.hidden = false;
+    }
+
+    trackingForm.addEventListener("submit", async event => {
+        event.preventDefault();
+        await lookupOrder(trackingCode.value);
     });
+
+    clientRequestForm.addEventListener("submit", async event => {
+        event.preventDefault();
+        clientRequestMessage.hidden = true;
+        const submit = clientRequestForm.querySelector("button[type=submit]");
+        submit.disabled = true;
+        const { data, error } = client ? await client.rpc("submit_public_order_request", {
+            lookup_code: activeTrackingCode,
+            request_kind: document.querySelector("#client-request-type").value,
+            request_message: document.querySelector("#client-request-message").value.trim()
+        }) : { data: false, error: true };
+        submit.disabled = false;
+        if (error || data !== true) {
+            clientRequestMessage.textContent = "Não foi possível enviar. Aguarde alguns minutos e tente novamente.";
+            clientRequestMessage.dataset.state = "error";
+            clientRequestMessage.hidden = false;
+            return;
+        }
+        clientRequestForm.reset();
+        clientRequestMessage.textContent = "Solicitação enviada às artistas. Elas vão analisar e responder pelo canal de contato já combinado.";
+        clientRequestMessage.dataset.state = "success";
+        clientRequestMessage.hidden = false;
+    });
+
+    const sharedCode = new URLSearchParams(window.location.search).get("codigo");
+    if (sharedCode) {
+        trackingCode.value = sharedCode;
+        lookupOrder(sharedCode);
+    }
 });

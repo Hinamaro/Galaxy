@@ -56,6 +56,18 @@
         </form>
         <p class="tracking-message" id="tracking-message" role="status" aria-live="polite" hidden></p>
         <article class="tracking-result" id="tracking-result" aria-live="polite" hidden></article>
+        <section class="tracking-request" id="tracking-request" aria-labelledby="tracking-request-title" hidden>
+            <span class="eyebrow">✦ Precisa de algo?</span><h3 id="tracking-request-title">Peça um ajuste ou tire uma dúvida</h3>
+            <p>Envie uma solicitação para as artistas. O pedido só será alterado depois que elas responderem.</p>
+            <form id="client-request-form" class="tracking-request-form">
+                <label for="client-request-type">Assunto</label>
+                <select id="client-request-type" required><option value="revision">Solicitar alteração</option><option value="cancellation">Conversar sobre cancelamento</option><option value="question">Fazer uma pergunta</option></select>
+                <label for="client-request-message">Mensagem</label>
+                <textarea id="client-request-message" required maxlength="1000" rows="3" placeholder="Conte brevemente como podemos ajudar"></textarea>
+                <button class="button button-primary" type="submit">Enviar solicitação</button>
+            </form>
+            <p class="tracking-request-message" id="tracking-request-message" role="status" aria-live="polite" hidden></p>
+        </section>
         <p class="tracking-privacy">A consulta mostra somente o tipo de arte e o andamento. Nome, contato e descrição do pedido ficam privados.</p>
     </section>
 </main>

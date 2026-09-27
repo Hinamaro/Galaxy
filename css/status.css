@@ -79,6 +79,20 @@
 .tracking-result .tracking-estimate { margin-top: 8px; padding: 11px 13px; border: 1px solid #e9cde0; border-radius: 12px; background: #fff4fa; color: #8c4f79; font-size: .86rem; font-weight: 750; }
 .tracking-result .tracking-estimate[data-has-estimate="false"] { border-color: #e7dced; background: #f8f4fa; color: #806e87; font-size: .78rem; font-weight: 600; }
 .tracking-contact-link { margin-top: 16px; }
+.tracking-history { margin-top: 19px; padding: 15px; border: 1px solid #e9d9ef; border-radius: 13px; background: #fbf7fd; }
+.tracking-history h4 { margin: 0 0 9px; color: #755385; font-size: .85rem; }
+.tracking-history ol { display: grid; gap: 7px; margin: 0; padding-left: 20px; color: var(--muted); font-size: .78rem; }
+.tracking-request { width: min(650px, calc(100% - 36px)); margin: 16px auto 0; padding: clamp(20px, 4vw, 30px); border: 1px solid rgba(220,179,214,.78); border-radius: 20px; background: linear-gradient(145deg, #fff9fc, #f3ebfa); }
+.tracking-request h3 { margin: 7px 0 4px; color: var(--text); }
+.tracking-request > p:not(.tracking-request-message) { margin: 0; color: var(--muted); font-size: .85rem; }
+.tracking-request-form { display: grid; gap: 8px; margin-top: 18px; }
+.tracking-request-form label { margin-top: 6px; color: var(--text-soft); font-size: .82rem; font-weight: 750; }
+.tracking-request-form select,.tracking-request-form textarea { width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 11px; background: white; color: var(--text); font: inherit; }
+.tracking-request-form textarea { resize: vertical; }
+.tracking-request-form button { justify-self: start; margin-top: 8px; }
+.tracking-request-message { margin: 12px 0 0; padding: 10px 12px; border-radius: 10px; background: #f1ebf7; color: #74528a; font-size: .82rem; }
+.tracking-request-message[data-state="error"] { background: #fff0f5; color: #934b6d; }
+.tracking-request-message[data-state="success"] { background: #eef8f1; color: #47765e; }
 .tracking-timeline { gap: 9px; }
 .tracking-step { min-height: 42px; display: grid; place-items: center; border: 1px solid rgba(211,190,222,.38); background: #f6f1f8; color: #817389; font-weight: 650; line-height: 1.35; }
 .tracking-step.is-done { border-color: #ead8ec; background: #f7eef8; color: #8a6495; }
