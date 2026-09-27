@@ -74,6 +74,11 @@
 .tracking-status-badge[data-status="delivered"] { background: #e9f3ed; color: #47765e; }
 .tracking-status-badge[data-status="cancelled"] { background: #f1e9ee; color: #795c6b; }
 .tracking-result .tracking-order-type { margin-top: 6px; color: var(--muted); font-size: .88rem; }
+.tracking-explanation { margin: 14px 0 10px; padding: 13px 15px; border-left: 3px solid #bd91cd; border-radius: 0 12px 12px 0; background: linear-gradient(100deg, #f7effa, #fff5fa); color: #70567f; line-height: 1.6; }
+.tracking-result .tracking-updated { margin-top: 10px; color: #8b788f; font-size: .76rem; }
+.tracking-result .tracking-estimate { margin-top: 8px; padding: 11px 13px; border: 1px solid #e9cde0; border-radius: 12px; background: #fff4fa; color: #8c4f79; font-size: .86rem; font-weight: 750; }
+.tracking-result .tracking-estimate[data-has-estimate="false"] { border-color: #e7dced; background: #f8f4fa; color: #806e87; font-size: .78rem; font-weight: 600; }
+.tracking-contact-link { margin-top: 16px; }
 .tracking-timeline { gap: 9px; }
 .tracking-step { min-height: 42px; display: grid; place-items: center; border: 1px solid rgba(211,190,222,.38); background: #f6f1f8; color: #817389; font-weight: 650; line-height: 1.35; }
 .tracking-step.is-done { border-color: #ead8ec; background: #f7eef8; color: #8a6495; }

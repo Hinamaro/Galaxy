@@ -9,7 +9,9 @@
 
 ## Ativar acompanhamento público e remoção de pedidos
 
-Antes de publicar esta versão, abra **SQL Editor → New query**, cole e execute o conteúdo de `supabase/public-tracking-and-order-delete.sql`. Isso gera códigos aleatórios para os pedidos existentes e novos, libera a remoção somente para artistas autorizadas e permite consultar publicamente apenas o tipo de arte, a etapa e a data usando o código. Contato, nome e resumo nunca são retornados à página pública.
+Antes de publicar a versão anterior, o projeto executou `supabase/public-tracking-and-order-delete.sql`: essa atualização gera códigos aleatórios, libera a remoção apenas para artistas autorizadas e permite consultar por código dados limitados do pedido. Contato, nome e resumo não são retornados à página pública.
+
+Para habilitar as melhorias novas, abra **SQL Editor → New query** e execute `supabase/order-tracking-details.sql` uma vez. Essa migração adiciona uma previsão de entrega opcional e faz a consulta retornar a data da última atualização, além do tipo e da etapa. No painel, a previsão pode ser preenchida na criação ou alterada no cartão do pedido.
 
 ## O que falta antes do primeiro acesso
 
@@ -40,7 +42,7 @@ Antes de publicar esta versão, abra **SQL Editor → New query**, cole e execut
 2. Na versão sem autenticador, basta entrar com e-mail e senha.
 3. Em **Disponibilidade das comissões**, escolha abertas, poucas vagas ou fechadas; informe as vagas e um aviso que possa ser público; salve. A página pública de status reflete a mudança.
 4. Em **Pedidos**, registre nome, contato, tipo de arte e resumo. Depois, atualize a etapa do pedido no seletor da ficha.
-   O painel também mostra um código aleatório para compartilhar com o cliente. Ele informa o código na página **Status** para acompanhar a etapa. Use **Remover pedido** na ficha e confirme para excluir permanentemente.
+   O painel mostra um código aleatório para compartilhar com o cliente, resumo de quantidades por etapa, busca por cliente/código e filtros rápidos. O cliente informa o código na página **Status** para acompanhar a etapa, ler o que ela significa e ver quando foi atualizada. A previsão é opcional; só aparece quando uma artista a define. Use **Remover pedido** na ficha e confirme para excluir permanentemente.
 
 Nome, contato e resumo dos pedidos ficam privados para as artistas. O público só vê a disponibilidade geral e, ao informar o código individual, o tipo de arte, a etapa e a data. Não coloque informação de cliente no aviso público.
 

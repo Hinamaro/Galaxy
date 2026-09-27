@@ -15,6 +15,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         ["queue", "Na fila"], ["sketch", "Esboço"], ["approval", "Aprovação"],
         ["finalizing", "Finalização"], ["delivered", "Entregue"]
     ];
+    const statusDescriptions = {
+        received: "A artista recebeu seu pedido e vai revisar os detalhes.",
+        quote: "Estamos combinando o valor e os detalhes da comissão.",
+        payment: "Aguardando a confirmação do pagamento combinado.",
+        queue: "Tudo certo! Seu pedido está aguardando a vez na fila.",
+        sketch: "A artista está preparando o esboço da sua arte.",
+        approval: "O esboço está pronto e aguarda sua aprovação ou comentários.",
+        finalizing: "A arte está nos ajustes finais antes da entrega.",
+        delivered: "Sua comissão foi finalizada e entregue. Obrigada pelo apoio!",
+        cancelled: "Este pedido foi cancelado. Entre em contato com as artistas se tiver dúvidas."
+    };
 
     const showUnavailable = (heading, message) => {
         card.dataset.state = "setup";
@@ -118,6 +129,22 @@ document.addEventListener("DOMContentLoaded", async () => {
         const subtitle = document.createElement("p");
         subtitle.className = "tracking-order-type";
         subtitle.textContent = `${order.art_type} · recebido em ${new Date(order.created_at).toLocaleDateString("pt-BR")}`;
+        const explanation = document.createElement("p");
+        explanation.className = "tracking-explanation";
+        explanation.textContent = statusDescriptions[order.status] || "A artista está atualizando o andamento do seu pedido.";
+        const updated = document.createElement("p");
+        updated.className = "tracking-updated";
+        updated.textContent = `Etapa atualizada em ${new Date(order.updated_at || order.created_at).toLocaleString("pt-BR", { dateStyle: "medium", timeStyle: "short" })}`;
+        const estimate = document.createElement("p");
+        estimate.className = "tracking-estimate";
+        if (order.estimated_delivery) {
+            const [year, month, day] = order.estimated_delivery.split("-").map(Number);
+            estimate.textContent = `Previsão de entrega: ${new Date(year, month - 1, day).toLocaleDateString("pt-BR", { dateStyle: "long" })}`;
+            estimate.dataset.hasEstimate = "true";
+        } else {
+            estimate.textContent = "A artista ainda não informou uma previsão de entrega.";
+            estimate.dataset.hasEstimate = "false";
+        }
         const timeline = document.createElement("div");
         timeline.className = "tracking-timeline";
         if (order.status !== "cancelled") {
@@ -128,8 +155,13 @@ document.addEventListener("DOMContentLoaded", async () => {
                 step.textContent = label;
                 timeline.append(step);
             });
-            trackingResult.append(heading, subtitle, timeline);
-        } else trackingResult.append(heading, subtitle);
+            trackingResult.append(heading, subtitle, explanation, updated, estimate, timeline);
+        } else trackingResult.append(heading, subtitle, explanation, updated, estimate);
+        const contactLink = document.createElement("a");
+        contactLink.className = "button button-secondary tracking-contact-link";
+        contactLink.href = "contact.html";
+        contactLink.textContent = "Falar com as artistas";
+        trackingResult.append(contactLink);
         trackingResult.hidden = false;
     });
 });

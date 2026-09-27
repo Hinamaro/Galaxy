@@ -75,9 +75,25 @@
                 <label for="order-contact">Contato privado</label><input id="order-contact" required maxlength="180" placeholder="E-mail ou @ de rede social">
                 <label for="order-type">Tipo de arte</label><input id="order-type" required maxlength="100" placeholder="Ex.: meio corpo renderizado">
                 <label for="order-summary">Resumo do pedido</label><textarea id="order-summary" required maxlength="1200" rows="3"></textarea>
+                <label for="order-estimate">Previsão de entrega (opcional)</label><input id="order-estimate" type="date" aria-describedby="estimate-help">
+                <span class="form-help" id="estimate-help">A previsão só aparece na consulta do cliente quando você escolher uma data.</span>
                 <button class="button button-primary" type="submit">Adicionar pedido</button>
             </form>
-            <p class="privacy-note">Os pedidos e contatos ficam privados e só aparecem após autenticação das artistas.</p>
+            <p class="privacy-note">Nome, contato e resumo ficam privados. O código compartilhado mostra ao cliente apenas o tipo de arte, a etapa e uma previsão, se informada.</p>
+            <div class="orders-overview" id="orders-overview" aria-label="Resumo de pedidos"></div>
+            <div class="orders-toolbar">
+                <label class="sr-only" for="orders-search">Buscar por cliente ou código</label>
+                <input id="orders-search" type="search" placeholder="Buscar cliente ou código…" autocomplete="off">
+                <label class="sr-only" for="orders-filter">Filtrar pedidos por etapa</label>
+                <select id="orders-filter">
+                    <option value="all">Todas as etapas</option>
+                    <option value="received">Pedido recebido</option><option value="quote">Orçamento enviado</option>
+                    <option value="payment">Aguardando pagamento</option><option value="queue">Na fila</option>
+                    <option value="sketch">Esboço</option><option value="approval">Aguardando aprovação</option>
+                    <option value="finalizing">Finalização</option><option value="delivered">Entregue</option>
+                    <option value="cancelled">Cancelado</option>
+                </select>
+            </div>
             <div class="orders-list" id="orders-list" aria-live="polite"></div>
         </section>
     </section>

@@ -148,26 +148,61 @@ document.addEventListener("DOMContentLoaded", async () => {
         ["delivered", "Entregue"],
         ["cancelled", "Cancelado"]
     ];
+    const ordersSearch = document.querySelector("#orders-search");
+    const ordersFilter = document.querySelector("#orders-filter");
+    const ordersOverview = document.querySelector("#orders-overview");
+    let cachedOrders = [];
 
-    async function loadOrders() {
+    function renderOrdersOverview() {
+        ordersOverview.replaceChildren();
+        const filters = [["all", "Todos", cachedOrders.length], ...orderStatuses.map(([value, label]) => [
+            value,
+            label,
+            cachedOrders.filter(order => order.status === value).length
+        ])];
+        filters.forEach(([value, label, count]) => {
+            const chip = document.createElement("button");
+            chip.type = "button";
+            chip.className = "order-count-chip";
+            chip.dataset.status = value;
+            chip.setAttribute("aria-pressed", String(ordersFilter.value === value));
+            const number = document.createElement("strong");
+            number.textContent = count;
+            const caption = document.createElement("span");
+            caption.textContent = label;
+            chip.append(number, caption);
+            chip.addEventListener("click", () => {
+                ordersFilter.value = value;
+                renderOrdersOverview();
+                renderOrders();
+            });
+            ordersOverview.append(chip);
+        });
+    }
+
+    ordersSearch.addEventListener("input", renderOrders);
+    ordersFilter.addEventListener("change", () => {
+        renderOrdersOverview();
+        renderOrders();
+    });
+
+    function renderOrders() {
         const container = document.querySelector("#orders-list");
         container.replaceChildren();
-        container.setAttribute("aria-busy", "true");
-        const { data, error } = await client
-            .from("commission_orders")
-            .select("id, client_name, client_contact, art_type, summary, status, created_at, tracking_code")
-            .order("created_at", { ascending: false });
-        container.setAttribute("aria-busy", "false");
-        if (error) {
-            container.textContent = "Não foi possível carregar os pedidos.";
-            return;
-        }
-        if (!data.length) {
-            container.textContent = "Ainda não há pedidos cadastrados.";
+        const query = ordersSearch.value.trim().toLocaleLowerCase("pt-BR");
+        const filtered = cachedOrders.filter(order => {
+            const matchesStatus = ordersFilter.value === "all" || order.status === ordersFilter.value;
+            const searchable = `${order.client_name} ${order.tracking_code || ""}`.toLocaleLowerCase("pt-BR");
+            return matchesStatus && searchable.includes(query);
+        });
+        if (!filtered.length) {
+            container.textContent = cachedOrders.length
+                ? "Nenhum pedido corresponde à busca e ao filtro selecionados."
+                : "Ainda não há pedidos cadastrados.";
             return;
         }
 
-        data.forEach(order => {
+        filtered.forEach(order => {
             const row = document.createElement("article");
             row.className = "order-row";
             row.dataset.status = order.status;
@@ -190,9 +225,17 @@ document.addEventListener("DOMContentLoaded", async () => {
             const date = document.createElement("span");
             date.className = "order-date";
             date.textContent = new Date(order.created_at).toLocaleDateString("pt-BR");
+            const lastUpdated = document.createElement("span");
+            const updatedDay = new Date(order.updated_at || order.created_at);
+            const today = new Date();
+            updatedDay.setHours(0, 0, 0, 0);
+            today.setHours(0, 0, 0, 0);
+            const daysSinceUpdate = Math.max(0, Math.floor((today - updatedDay) / 86400000));
+            lastUpdated.className = `order-last-updated${daysSinceUpdate >= 7 ? " is-stale" : ""}`;
+            lastUpdated.textContent = daysSinceUpdate === 0 ? "Atualizado hoje" : daysSinceUpdate === 1 ? "Atualizado ontem" : `Sem atualização há ${daysSinceUpdate} dias`;
             const tracking = document.createElement("p");
             tracking.className = "order-tracking-code";
-            tracking.textContent = `Código para o cliente: ${order.tracking_code || "Indisponível — aplique a atualização do Supabase"}`;
+            tracking.textContent = `Código para o cliente: ${order.tracking_code || " indisponível"}`;
             if (order.tracking_code) {
                 const copyCode = document.createElement("button");
                 copyCode.type = "button";
@@ -208,7 +251,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 });
                 tracking.append(document.createTextNode(" "), copyCode);
             }
-            details.append(heading, badge, contact, type, summary, date, tracking);
+            details.append(heading, badge, contact, type, summary, date, lastUpdated, tracking);
 
             const select = document.createElement("select");
             select.dataset.status = order.status;
@@ -222,23 +265,52 @@ document.addEventListener("DOMContentLoaded", async () => {
             });
             select.addEventListener("change", async () => {
                 select.disabled = true;
+                const newStatus = select.value;
                 const { error: updateError } = await client.from("commission_orders")
-                    .update({ status: select.value }).eq("id", order.id);
+                    .update({ status: newStatus }).eq("id", order.id);
                 select.disabled = false;
                 if (updateError) {
                     setMessage("Não foi possível atualizar a etapa do pedido.", true);
                     await loadOrders();
                 } else {
-                    select.dataset.status = select.value;
-                    row.dataset.status = select.value;
-                    badge.dataset.status = select.value;
-                    badge.textContent = select.selectedOptions[0].textContent;
+                    order.status = newStatus;
+                    order.updated_at = new Date().toISOString();
                     setMessage(`Etapa atualizada: ${select.selectedOptions[0].textContent}.`);
+                    renderOrdersOverview();
+                    renderOrders();
                 }
             });
+
+            const estimateControl = document.createElement("div");
+            estimateControl.className = "order-estimate-control";
+            const estimateLabel = document.createElement("label");
+            estimateLabel.textContent = "Previsão de entrega";
+            const estimateInput = document.createElement("input");
+            estimateInput.type = "date";
+            estimateInput.value = order.estimated_delivery || "";
+            estimateInput.setAttribute("aria-label", `Previsão de entrega do pedido de ${order.client_name}`);
+            estimateInput.title = "Opcional: ficará visível ao cliente";
+            estimateInput.addEventListener("change", async () => {
+                estimateInput.disabled = true;
+                const { error: estimateError } = await client.from("commission_orders")
+                    .update({ estimated_delivery: estimateInput.value || null }).eq("id", order.id);
+                estimateInput.disabled = false;
+                if (estimateError) {
+                    setMessage("Não foi possível salvar a previsão. Atualize a migração de acompanhamento no Supabase.", true);
+                    estimateInput.value = order.estimated_delivery || "";
+                } else {
+                    order.estimated_delivery = estimateInput.value || null;
+                    order.updated_at = new Date().toISOString();
+                    lastUpdated.textContent = "Atualizado hoje";
+                    lastUpdated.classList.remove("is-stale");
+                    setMessage(order.estimated_delivery ? "Previsão salva e visível ao cliente." : "Previsão removida da consulta do cliente.");
+                }
+            });
+            estimateControl.append(estimateLabel, estimateInput);
+
             const controls = document.createElement("div");
             controls.className = "order-controls";
-            controls.append(select);
+            controls.append(select, estimateControl);
             const remove = document.createElement("button");
             remove.type = "button";
             remove.className = "button button-secondary order-delete";
@@ -250,7 +322,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 const { error: deleteError } = await client.from("commission_orders").delete().eq("id", order.id);
                 if (deleteError) {
                     remove.disabled = false;
-                    setMessage("Não foi possível remover. Aplique a atualização de permissões no SQL Editor do Supabase e tente novamente.", true);
+                    setMessage("Não foi possível remover o pedido. Confira se a permissão de exclusão foi aplicada no Supabase.", true);
                     return;
                 }
                 setMessage("Pedido removido.");
@@ -262,6 +334,26 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 
+    async function loadOrders() {
+        const container = document.querySelector("#orders-list");
+        container.replaceChildren();
+        container.setAttribute("aria-busy", "true");
+        const { data, error } = await client
+            .from("commission_orders")
+            .select("id, client_name, client_contact, art_type, summary, status, created_at, updated_at, tracking_code, estimated_delivery")
+            .order("created_at", { ascending: false });
+        container.setAttribute("aria-busy", "false");
+        if (error) {
+            container.textContent = error.message?.includes("estimated_delivery")
+                ? "Aplique a atualização supabase/order-tracking-details.sql para carregar a previsão e a fila de pedidos."
+                : "Não foi possível carregar os pedidos.";
+            return;
+        }
+        cachedOrders = data || [];
+        renderOrdersOverview();
+        renderOrders();
+    }
+
     document.querySelector("#order-form").addEventListener("submit", async event => {
         event.preventDefault();
         const form = event.currentTarget;
@@ -270,7 +362,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             client_contact: document.querySelector("#order-contact").value.trim(),
             art_type: document.querySelector("#order-type").value.trim(),
             summary: document.querySelector("#order-summary").value.trim(),
-            status: "received"
+            status: "received",
+            estimated_delivery: document.querySelector("#order-estimate").value || null
         };
         const { data: newOrder, error } = await client.from("commission_orders").insert(fields).select("tracking_code").single();
         if (error) {
