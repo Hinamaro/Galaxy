@@ -11,7 +11,7 @@
 
 Antes de publicar a versão anterior, o projeto executou `supabase/public-tracking-and-order-delete.sql`: essa atualização gera códigos aleatórios, libera a remoção apenas para artistas autorizadas e permite consultar por código dados limitados do pedido. Contato, nome e resumo não são retornados à página pública.
 
-Para habilitar os recursos já preparados, abra **SQL Editor → New query** e execute, nesta ordem, `supabase/studio-workflow-upgrades.sql` e depois `supabase/business-tools.sql`. Faça isso uma vez, depois da migração de códigos/exclusão já executada. A primeira cria histórico, solicitações e galeria autorizada; a segunda cria acesso por artista, pagamentos e campos de comunicação. `order-tracking-details.sql` é uma versão anterior da previsão e não precisa ser executada separadamente.
+Para habilitar os recursos já preparados, abra **SQL Editor → New query** e execute, nesta ordem, `supabase/studio-workflow-upgrades.sql`, `supabase/business-tools.sql` e `supabase/email-notification-message.sql`. Faça isso uma vez, depois da migração de códigos/exclusão já executada. A primeira cria histórico, solicitações e galeria autorizada; a segunda cria acesso por artista, pagamentos e campos de comunicação; a terceira ativa a mensagem opcional privada incluída nos e-mails. `order-tracking-details.sql` é uma versão anterior da previsão e não precisa ser executada separadamente.
 
 ## O que falta antes do primeiro acesso
 
@@ -80,15 +80,17 @@ O envio foi preparado com EmailJS ligado ao endereço `MikiMwk@hotmail.com`. A a
 Em **Email Templates**, crie um modelo. No campo de destinatário (**To Email**), coloque `{{to_email}}`; use `{{subject}}` no assunto. Um corpo HTML simples pode ser:
 
 ```html
-<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;padding:28px;color:#482651;background:#fff8fc;border:1px solid #eed6e8;border-radius:18px">
-  <p style="color:#a34f80;font-weight:bold">ZOOLIXIANAS · COMISSÕES</p>
-  <h1>Oi, {{client_name}}!</h1>
-  <p>Sua comissão <strong>{{art_type}}</strong> recebeu uma atualização:</p>
-  <p style="padding:14px;background:#f8eafa;border-radius:12px"><strong>{{status_label}}</strong></p>
-  <p>Código do pedido: <strong>{{tracking_code}}</strong></p>
-  <p>Previsão de entrega: <strong>{{eta}}</strong></p>
-  <p><a href="{{tracking_url}}" style="display:inline-block;padding:12px 18px;background:#d987b5;color:white;text-decoration:none;border-radius:999px">Acompanhar pedido pelo site</a></p>
-  <p style="color:#88778b;font-size:13px">Você recebe este aviso porque autorizou atualizações por e-mail.</p>
+<style>@media only screen and (max-width:600px){.zx-wrap{padding:18px!important}.zx-title{font-size:24px!important}.zx-button{display:block!important;text-align:center!important}}</style>
+<div class="zx-wrap" style="width:100%;max-width:560px;box-sizing:border-box;margin:0 auto;padding:26px;color:#482651;background:#fff8fc;border:1px solid #eed6e8;border-radius:18px;font-family:Arial,sans-serif">
+  <p style="margin:0 0 16px;color:#a34f80;font-weight:bold;letter-spacing:.08em">ZOOLIXIANAS · COMISSÕES</p>
+  <h1 class="zx-title" style="margin:0 0 16px;font-size:28px;line-height:1.2">Oi, {{client_name}}!</h1>
+  <p style="margin:0 0 16px;line-height:1.55">Sua comissão <strong>{{art_type}}</strong> recebeu uma atualização:</p>
+  <div style="margin:0 0 16px;padding:14px 16px;border-radius:12px;background:{{status_color}};color:#fff;font-weight:bold;line-height:1.4">{{status_label}}</div>
+  <p style="margin:0 0 14px">Código do pedido: <strong style="color:#a34f80;letter-spacing:2px">{{tracking_code}}</strong></p>
+  {{#has_eta}}<p style="margin:0 0 16px">Previsão de entrega: <strong>{{eta}}</strong></p>{{/has_eta}}
+  {{#has_artist_message}}<div style="margin:0 0 18px;padding:14px 16px;border-left:4px solid #c97dac;border-radius:10px;background:#f8eafa;line-height:1.55;white-space:pre-line"><strong>Mensagem da artista</strong><br>{{artist_message}}</div>{{/has_artist_message}}
+  <p style="margin:20px 0"><a class="zx-button" href="{{tracking_url}}" style="display:inline-block;padding:13px 20px;background:#d987b5;color:#fff;text-decoration:none;border-radius:999px;font-weight:bold">Acompanhar pedido pelo site</a></p>
+  <p style="margin:18px 0 0;color:#88778b;font-size:13px;line-height:1.5">Você recebe este aviso porque autorizou atualizações por e-mail.</p>
 </div>
 ```
 

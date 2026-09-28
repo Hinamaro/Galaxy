@@ -457,6 +457,43 @@ document.addEventListener("DOMContentLoaded", async () => {
         return section;
     }
 
+    function createOrderEmailMessage(order) {
+        const section = document.createElement("section");
+        section.className = "order-email-message";
+        const label = document.createElement("label");
+        label.textContent = "Mensagem opcional neste e-mail";
+        const message = document.createElement("textarea");
+        message.rows = 2;
+        message.maxLength = 500;
+        message.value = order.artist_email_message || "";
+        message.placeholder = "Ex.: Se quiser mudar algum detalhe, me responda por este e-mail.";
+        message.setAttribute("aria-label", `Mensagem opcional no e-mail do pedido de ${order.client_name}`);
+        const save = document.createElement("button");
+        save.type = "button";
+        save.className = "save-email-message";
+        save.textContent = "Salvar mensagem";
+        const help = document.createElement("small");
+        help.textContent = "Esta mensagem vai junto com os avisos por e-mail e fica privada no painel.";
+        save.addEventListener("click", async () => {
+            save.disabled = true;
+            const value = message.value.trim();
+            const { error } = await client.from("commission_orders")
+                .update({ artist_email_message: value || null }).eq("id", order.id);
+            save.disabled = false;
+            if (error) { setMessage("Não foi possível salvar a mensagem. Aplique supabase/email-notification-message.sql no Supabase.", true); return; }
+            order.artist_email_message = value || null;
+            save.textContent = "Mensagem salva";
+            setMessage("Mensagem do e-mail salva.");
+            window.setTimeout(() => { save.textContent = "Salvar mensagem"; }, 1800);
+        });
+        section.append(label, message, save, help);
+        return section;
+    }
+
+    function resendCooldownKey(order) {
+        return `zoolixianas-email-resend:${order.id}:${order.status}`;
+    }
+
     function renderOrders() {
         const container = document.querySelector("#orders-list");
         container.replaceChildren();
@@ -583,12 +620,35 @@ document.addEventListener("DOMContentLoaded", async () => {
                     resendEmail.type = "button";
                     resendEmail.className = "copy-tracking-code resend-status-email";
                     resendEmail.textContent = "Reenviar e-mail de status";
+                    const cooldownKey = resendCooldownKey(order);
+                    const cooldownUntil = Number(sessionStorage.getItem(cooldownKey) || 0);
+                    if (cooldownUntil > Date.now()) {
+                        resendEmail.disabled = true;
+                        resendEmail.textContent = "E-mail enviado há pouco";
+                        window.setTimeout(() => {
+                            resendEmail.disabled = false;
+                            resendEmail.textContent = "Reenviar e-mail de status";
+                            sessionStorage.removeItem(cooldownKey);
+                        }, cooldownUntil - Date.now());
+                    }
                     resendEmail.addEventListener("click", async () => {
+                        if (resendEmail.disabled) return;
+                        const statusName = orderStatuses.find(([value]) => value === order.status)?.[1] || "atual";
+                        if (!window.confirm(`Enviar novamente o aviso “${statusName}” para ${order.client_email}?`)) return;
                         resendEmail.disabled = true;
                         const result = await sendStatusEmail(order);
-                        resendEmail.disabled = false;
+                        if (result.sent) {
+                            const until = Date.now() + 60000;
+                            sessionStorage.setItem(cooldownKey, String(until));
+                            resendEmail.textContent = "E-mail enviado há pouco";
+                            window.setTimeout(() => {
+                                resendEmail.disabled = false;
+                                resendEmail.textContent = "Reenviar e-mail de status";
+                                sessionStorage.removeItem(cooldownKey);
+                            }, 60000);
+                        } else resendEmail.disabled = false;
                         setMessage(result.sent
-                            ? `Aviso da etapa “${orderStatuses.find(([value]) => value === order.status)?.[1] || "atual"}” enviado para ${order.client_email}.`
+                            ? `Aviso da etapa “${statusName}” enviado para ${order.client_email}. O botão ficará pausado por 1 minuto para evitar duplicidade.`
                             : result.error || result.message, Boolean(result.error));
                     });
                     tracking.append(document.createTextNode(" "), resendEmail);
@@ -649,8 +709,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             });
 
             const emailPrefs = createOrderEmailPrefs(order);
+            const emailMessage = createOrderEmailMessage(order);
             const finance = createOrderFinance(order);
-            details.append(heading, badge, contact, emailInfo, emailPrefs, type, artist, summary, date, lastUpdated, tracking, finance, historyDetails, requestsDetails);
+            details.append(heading, badge, contact, emailInfo, emailPrefs, emailMessage, type, artist, summary, date, lastUpdated, tracking, finance, historyDetails, requestsDetails);
 
             const select = document.createElement("select");
             select.dataset.status = order.status;
@@ -745,12 +806,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         container.setAttribute("aria-busy", "true");
         const { data, error } = await client
             .from("commission_orders")
-            .select("id, client_name, client_contact, client_email, email_updates_enabled, art_type, summary, status, created_at, updated_at, tracking_code, estimated_delivery, artist_name, agreed_amount")
+            .select("id, client_name, client_contact, client_email, email_updates_enabled, artist_email_message, art_type, summary, status, created_at, updated_at, tracking_code, estimated_delivery, artist_name, agreed_amount")
             .order("created_at", { ascending: false });
         container.setAttribute("aria-busy", "false");
         if (error) {
-            container.textContent = error.message?.includes("client_email") || error.message?.includes("email_updates_enabled") || error.message?.includes("agreed_amount")
-                ? "Aplique supabase/business-tools.sql no SQL Editor do Supabase para ativar e-mail e controle financeiro."
+            container.textContent = error.message?.includes("client_email") || error.message?.includes("email_updates_enabled") || error.message?.includes("agreed_amount") || error.message?.includes("artist_email_message")
+                ? "Aplique supabase/business-tools.sql e supabase/email-notification-message.sql no SQL Editor do Supabase para ativar os recursos de e-mail e controle financeiro."
                 : error.message?.includes("estimated_delivery")
                     ? "Aplique supabase/order-tracking-details.sql no SQL Editor do Supabase."
                 : error.message?.includes("artist_name")

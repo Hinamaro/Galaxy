@@ -11,11 +11,10 @@ const labels: Record<string, string> = {
   queue: "Na fila", sketch: "Esboço", approval: "Aguardando aprovação",
   finalizing: "Finalização", delivered: "Entregue", cancelled: "Cancelado",
 };
-
-const htmlEntities: Record<string, string> = {
-  "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+const statusColors: Record<string, string> = {
+  received: "#ad5a83", quote: "#a74f7f", payment: "#874f87", queue: "#805a98",
+  sketch: "#68568c", approval: "#5b4c8c", finalizing: "#523c76", delivered: "#47765e", cancelled: "#735666",
 };
-const escapeHtml = (value: string) => value.replace(/[&<>"']/g, char => htmlEntities[char]);
 
 Deno.serve(async request => {
   if (request.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -46,7 +45,7 @@ Deno.serve(async request => {
   if (!orderId) return Response.json({ error: "Pedido inválido." }, { status: 400, headers: corsHeaders });
 
   const { data: order, error } = await supabase.from("commission_orders")
-    .select("id, client_name, client_email, email_updates_enabled, art_type, status, tracking_code, estimated_delivery")
+    .select("id, client_name, client_email, email_updates_enabled, artist_email_message, art_type, status, tracking_code, estimated_delivery")
     .eq("id", orderId).single();
   if (error || !order) return Response.json({ error: "Pedido não encontrado ou sem acesso." }, { status: 404, headers: corsHeaders });
   if (!order.email_updates_enabled || !order.client_email) {
@@ -69,13 +68,9 @@ Deno.serve(async request => {
   const trackingUrl = `${siteUrl.origin}/status.html?codigo=${encodeURIComponent(order.tracking_code)}`;
   const eta = order.estimated_delivery
     ? new Date(`${order.estimated_delivery}T12:00:00Z`).toLocaleDateString("pt-BR", { timeZone: "UTC" })
-    : "Ainda não informada";
-  const name = escapeHtml(order.client_name);
-  const artType = escapeHtml(order.art_type);
-  const safeLabel = escapeHtml(label);
-  const safeEta = escapeHtml(eta);
-  const safeUrl = escapeHtml(trackingUrl);
-  const safeTrackingCode = escapeHtml(order.tracking_code);
+    : "";
+  const artistMessage = String(order.artist_email_message || "").trim().slice(0, 500);
+  const statusColor = statusColors[order.status] || "#a174bb";
   const response = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -86,12 +81,16 @@ Deno.serve(async request => {
       template_id: emailJsTemplateId,
       template_params: {
         to_email: order.client_email,
-        client_name: name,
-        art_type: artType,
-        status_label: safeLabel,
-        eta: safeEta,
-        tracking_code: safeTrackingCode,
-        tracking_url: safeUrl,
+        client_name: order.client_name,
+        art_type: order.art_type,
+        status_label: label,
+        eta,
+        tracking_code: order.tracking_code,
+        tracking_url: trackingUrl,
+        has_eta: Boolean(order.estimated_delivery),
+        has_artist_message: Boolean(artistMessage),
+        artist_message: artistMessage,
+        status_color: statusColor,
         subject: `Atualização da sua comissão: ${label}`,
       },
     }),
