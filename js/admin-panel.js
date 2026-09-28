@@ -175,6 +175,35 @@ document.addEventListener("DOMContentLoaded", async () => {
         delivered: "Sua comissão foi finalizada e entregue. Obrigada pelo apoio!",
         cancelled: "O pedido foi cancelado. Se quiser conversar sobre isso, estou à disposição."
     };
+
+    async function sendStatusEmail(order) {
+        if (!order.email_updates_enabled || !order.client_email) {
+            return { skipped: true, message: "Cadastre o e-mail do cliente e confirme a autorização na ficha para ativar os avisos." };
+        }
+        const { data, error } = await client.functions.invoke("notify-order-status", { body: { orderId: order.id } });
+        if (!error) return data?.sent
+            ? { sent: true }
+            : { skipped: true, message: data?.reason || "O cliente não autorizou avisos por e-mail ou não informou um endereço." };
+
+        const status = error.context?.status;
+        let detail = "";
+        try {
+            if (error.context?.clone) {
+                const body = await error.context.clone().json();
+                detail = body?.error || body?.message || "";
+            }
+        } catch { /* O servidor pode responder sem JSON. */ }
+
+        if (status === 404) return { error: "A função de e-mail não está publicada no Supabase. Implante notify-order-status." };
+        if (status === 401) return { error: "A sessão expirou ou a função recusou a autenticação. Saia e entre novamente no painel." };
+        if (status === 403) return { error: "A conta atual não tem acesso a este pedido para enviar o aviso." };
+        if (status === 503) return { error: detail || "Falta configurar RESEND_API_KEY e MAIL_FROM nos segredos da Edge Function." };
+        if (status === 502) return { error: detail || "O serviço de e-mail recusou o envio. Confira domínio/remetente e a chave do provedor." };
+        if (error.name === "FunctionsFetchError" || error.name === "TypeError") {
+            return { error: "Não foi possível alcançar a função. Confira se ela foi publicada e se o projeto Supabase está acessível." };
+        }
+        return { error: detail || `Falha ao chamar a função de e-mail${status ? ` (HTTP ${status})` : ""}. Confira os registros da Edge Function no Supabase.` };
+    }
     const ordersSearch = document.querySelector("#orders-search");
     const ordersFilter = document.querySelector("#orders-filter");
     const ordersArtistFilter = document.querySelector("#orders-artist-filter");
@@ -390,6 +419,44 @@ document.addEventListener("DOMContentLoaded", async () => {
         return section;
     }
 
+    function createOrderEmailPrefs(order) {
+        const section = document.createElement("section");
+        section.className = "order-email-preferences";
+        const heading = document.createElement("strong"); heading.textContent = "Avisos por e-mail ao cliente";
+        const form = document.createElement("form"); form.className = "order-email-form";
+        const email = document.createElement("input"); email.type = "email"; email.maxLength = 254; email.autocomplete = "email";
+        email.value = order.client_email || ""; email.placeholder = "cliente@exemplo.com";
+        email.setAttribute("aria-label", `E-mail para avisos do pedido de ${order.client_name}`);
+        const consentLabel = document.createElement("label"); consentLabel.className = "order-email-consent";
+        const consent = document.createElement("input"); consent.type = "checkbox"; consent.checked = order.email_updates_enabled === true;
+        consentLabel.append(consent, document.createTextNode(" Cliente autorizou receber atualizações"));
+        const save = document.createElement("button"); save.type = "submit"; save.textContent = "Salvar e-mail";
+        const help = document.createElement("span"); help.className = "order-email-help";
+        help.textContent = "Sem autorização marcada, nenhum aviso automático será enviado.";
+        const updateConsentRequirement = () => { consent.required = Boolean(email.value.trim()); };
+        email.addEventListener("input", updateConsentRequirement);
+        form.append(email, consentLabel, save);
+        form.addEventListener("submit", async event => {
+            event.preventDefault();
+            const address = email.value.trim();
+            if (address && !consent.checked) { setMessage("Marque a autorização do cliente antes de salvar o e-mail para avisos.", true); consent.focus(); return; }
+            save.disabled = true;
+            const { error } = await client.from("commission_orders").update({
+                client_email: address || null,
+                email_updates_enabled: Boolean(address && consent.checked)
+            }).eq("id", order.id);
+            save.disabled = false;
+            if (error) { setMessage("Não foi possível salvar o e-mail. Confira se business-tools.sql foi aplicado.", true); return; }
+            order.client_email = address || null;
+            order.email_updates_enabled = Boolean(address && consent.checked);
+            setMessage(order.email_updates_enabled ? "E-mail e autorização salvos. Mudanças de status poderão enviar avisos." : "E-mail salvo sem autorização; os avisos automáticos ficam desligados.");
+            await loadOrders();
+        });
+        updateConsentRequirement();
+        section.append(heading, form, help);
+        return section;
+    }
+
     function renderOrders() {
         const container = document.querySelector("#orders-list");
         container.replaceChildren();
@@ -511,6 +578,21 @@ document.addEventListener("DOMContentLoaded", async () => {
                     }
                 });
                 tracking.append(document.createTextNode(" "), copyCode, document.createTextNode(" "), copyLink, document.createTextNode(" "), copyMessage);
+                if (order.client_email && order.email_updates_enabled) {
+                    const resendEmail = document.createElement("button");
+                    resendEmail.type = "button";
+                    resendEmail.className = "copy-tracking-code resend-status-email";
+                    resendEmail.textContent = "Reenviar e-mail de status";
+                    resendEmail.addEventListener("click", async () => {
+                        resendEmail.disabled = true;
+                        const result = await sendStatusEmail(order);
+                        resendEmail.disabled = false;
+                        setMessage(result.sent
+                            ? `Aviso da etapa “${orderStatuses.find(([value]) => value === order.status)?.[1] || "atual"}” enviado para ${order.client_email}.`
+                            : result.error || result.message, Boolean(result.error));
+                    });
+                    tracking.append(document.createTextNode(" "), resendEmail);
+                }
             }
             const historyDetails = document.createElement("details");
             historyDetails.className = "order-history-details";
@@ -566,8 +648,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                 requestsDetails.append(requestCard);
             });
 
+            const emailPrefs = createOrderEmailPrefs(order);
             const finance = createOrderFinance(order);
-            details.append(heading, badge, contact, emailInfo, type, artist, summary, date, lastUpdated, tracking, finance, historyDetails, requestsDetails);
+            details.append(heading, badge, contact, emailInfo, emailPrefs, type, artist, summary, date, lastUpdated, tracking, finance, historyDetails, requestsDetails);
 
             const select = document.createElement("select");
             select.dataset.status = order.status;
@@ -591,13 +674,14 @@ document.addEventListener("DOMContentLoaded", async () => {
                 } else {
                     order.status = newStatus;
                     order.updated_at = new Date().toISOString();
-                    const { data: emailResult, error: emailError } = await client.functions.invoke("notify-order-status", { body: { orderId: order.id } });
+                    const emailResult = await sendStatusEmail(order);
                     const label = select.selectedOptions[0].textContent;
-                    setMessage(emailError
-                        ? `Etapa atualizada (${label}), mas o aviso por e-mail ainda não foi enviado. Confira a configuração do serviço de e-mail.`
-                        : emailResult?.sent
+                    setMessage(emailResult.error
+                        ? `Etapa atualizada (${label}), mas o e-mail falhou: ${emailResult.error}`
+                        : emailResult.sent
                             ? `Etapa atualizada (${label}) e aviso enviado por e-mail.`
-                            : `Etapa atualizada (${label}). ${emailResult?.skipped ? "E-mail não autorizado ou não informado; nenhuma mensagem foi enviada." : ""}`);
+                            : `Etapa atualizada (${label}). ${emailResult.message || "Nenhum e-mail foi enviado."}`,
+                        Boolean(emailResult.error));
                     await loadOrders();
                 }
             });

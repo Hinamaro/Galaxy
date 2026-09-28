@@ -141,6 +141,8 @@
 .client-request-card small { color: var(--muted); font-size: .7rem; }
 .client-request-card .copy-tracking-code { justify-self: start; margin: 3px 0 0; }
 .copy-tracking-code { margin: 4px 4px 2px 0; }
+.resend-status-email { border-color: #d9bddf; background: #f6effa; color: #765285; font-weight: 800; }
+.resend-status-email:hover { border-color: #c7a2d2; background: #efe4f5; }
 .export-orders-button { margin: 4px 0 6px; font-size: .76rem; }
 .gallery-consent-copy { max-width: 720px; color: var(--muted); font-size: .88rem; }
 .gallery-upload-form select { width: 100%; min-height: 48px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,.86); color: var(--text); font: inherit; }
@@ -175,6 +177,14 @@
 .payment-history li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; color: var(--muted); font-size: .74rem; }
 .email-consent { grid-column: 2; }
 .order-client-email-note { display: inline-flex; width: fit-content; margin-top: 4px; padding: 3px 8px; border-radius: 999px; background: #f5eef9; color: #765285; font-size: .68rem; font-weight: 750; }
+.order-email-preferences { display: grid; gap: 8px; margin-top: 9px; padding: 12px; border: 1px solid #ead8ed; border-radius: 13px; background: rgba(255,255,255,.65); }
+.order-email-preferences > strong { color: #765285; font-size: .77rem; }
+.order-email-form { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.order-email-form > input[type="email"] { flex: 1 1 210px; min-width: 0; min-height: 40px; padding: 8px 10px; border: 1px solid #e6c9df; border-radius: 10px; background: white; color: var(--text); font: inherit; font-size: .8rem; }
+.order-email-consent { display: inline-flex; align-items: center; gap: 6px; color: #765285; font-size: .72rem; font-weight: 700; }
+.order-email-consent input { width: 18px; height: 18px; accent-color: #aa72b9; }
+.order-email-form button { min-height: 38px; padding: 6px 11px; border: 1px solid #d8bedc; border-radius: 999px; background: #f6effa; color: #765285; font: inherit; font-size: .72rem; font-weight: 800; }
+.order-email-help { color: var(--muted); font-size: .7rem; line-height: 1.45; }
 @media (max-width: 800px) {
     .payment-entry-form { grid-template-columns: repeat(2,minmax(0,1fr)); }
     .payment-entry-form label { align-self: end; }
@@ -204,6 +214,9 @@
     .order-finance-form label { margin-top: 2px !important; }
     .order-finance-form button { grid-column: 1; justify-self: stretch; min-height: 42px; }
     .email-consent { grid-column: 1; }
+    .order-email-form { align-items: stretch; flex-direction: column; }
+    .order-email-form > input[type="email"] { flex: auto; width: 100%; min-height: 44px; }
+    .order-email-form button { min-height: 44px; }
 }
 @media (hover: none) {
     .order-row:hover,.order-count-chip:hover { transform: none; box-shadow: none; }
