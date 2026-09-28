@@ -3,7 +3,9 @@ create schema if not exists private;
 revoke all on schema private from public, anon, authenticated;
 
 create table if not exists private.artist_access (
-    user_id uuid primary key references auth.users(id) on delete cascade
+    user_id uuid primary key references auth.users(id) on delete cascade,
+    artist_name text,
+    can_manage_all boolean not null default false
 );
 alter table private.artist_access enable row level security;
 revoke all on private.artist_access from public, anon, authenticated;

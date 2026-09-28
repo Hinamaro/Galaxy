@@ -8,6 +8,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     let client = null;
     let passwordRecoveryMode = false;
+    let assignedArtistName = null;
+    let canManageAll = false;
 
     const setMessage = (message, isError = false) => {
         authMessage.textContent = message;
@@ -77,6 +79,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     async function loadDashboard() {
         await checkArtist();
+        const [{ data: artistName }, { data: managerAccess }, { data: userResult }] = await Promise.all([
+            client.rpc("current_artist_name"),
+            client.rpc("can_manage_all_commissions"),
+            client.auth.getUser()
+        ]);
+        assignedArtistName = artistName || null;
+        canManageAll = managerAccess === true;
+        const identity = document.querySelector("#account-identity");
+        identity.textContent = `${userResult.user?.email || "Conta autorizada"} · ${canManageAll ? "acesso de gestão" : assignedArtistName || "artista sem vínculo"}`;
+        const artistSelect = document.querySelector("#order-artist");
+        if (!canManageAll && assignedArtistName) {
+            artistSelect.value = assignedArtistName;
+            artistSelect.disabled = true;
+        }
         const { data: availability, error } = await client
             .from("commission_status")
             .select("state, slots_left, public_note")
@@ -164,8 +180,35 @@ document.addEventListener("DOMContentLoaded", async () => {
     const ordersArtistFilter = document.querySelector("#orders-artist-filter");
     const ordersOverview = document.querySelector("#orders-overview");
     const exportOrdersButton = document.querySelector("#export-orders");
+    const exportFullBackupButton = document.querySelector("#export-full-backup");
+    const financeMonth = document.querySelector("#finance-month");
+    const financeSummaryCards = document.querySelector("#finance-summary-cards");
     let cachedOrders = [];
+    let cachedPayments = [];
     let cachedGalleryItems = [];
+
+    const localMonth = (() => { const now = new Date(); return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`; })();
+    financeMonth.value = localMonth;
+    financeMonth.addEventListener("change", renderFinanceSummary);
+    const money = value => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(value) || 0);
+
+    function renderFinanceSummary() {
+        const month = financeMonth.value || localMonth;
+        const monthIncome = cachedPayments.filter(payment => payment.paid_at?.startsWith(month))
+            .reduce((sum, payment) => sum + Number(payment.amount), 0);
+        const newOrders = cachedOrders.filter(order => order.created_at?.startsWith(month)).length;
+        const activeBalance = cachedOrders.filter(order => !["delivered", "cancelled"].includes(order.status))
+            .reduce((sum, order) => sum + Math.max(0, Number(order.agreed_amount || 0)
+                - (order.payments || []).reduce((paid, payment) => paid + Number(payment.amount), 0)), 0);
+        financeSummaryCards.replaceChildren();
+        [["Recebido no mês", money(monthIncome)], ["Pedidos novos", String(newOrders)], ["Saldo em aberto", money(activeBalance)]].forEach(([label, value]) => {
+            const card = document.createElement("article");
+            card.className = "finance-stat";
+            const caption = document.createElement("span"); caption.textContent = label;
+            const total = document.createElement("strong"); total.textContent = value;
+            card.append(caption, total); financeSummaryCards.append(card);
+        });
+    }
 
     function renderOrdersOverview() {
         ordersOverview.replaceChildren();
@@ -242,7 +285,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             ["Tipo de arte", "art_type"], ["Resumo privado", "summary"],
             ["Status", "status"], ["Artista", "artist_name"],
             ["Criado em", "created_at"], ["Atualizado em", "updated_at"],
-            ["Previsão", "estimated_delivery"], ["Código", "tracking_code"]
+            ["Previsão", "estimated_delivery"], ["Código", "tracking_code"],
+            ["E-mail para atualização", "client_email"], ["Valor combinado", "agreed_amount"], ["Total recebido", "payments"]
         ];
         const csvCell = value => {
             let text = String(value ?? "");
@@ -250,7 +294,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             return `"${text.replaceAll('"', '""')}"`;
         };
         const rows = [columns.map(([label]) => csvCell(label)).join(",")];
-        cachedOrders.forEach(order => rows.push(columns.map(([, key]) => csvCell(order[key])).join(",")));
+        cachedOrders.forEach(order => rows.push(columns.map(([, key]) => csvCell(key === "agreed_amount"
+            ? money(order[key])
+            : key === "payments" ? money((order.payments || []).reduce((sum, item) => sum + Number(item.amount), 0))
+                : order[key])).join(",")));
         const blob = new Blob(["\uFEFF", rows.join("\r\n")], { type: "text/csv;charset=utf-8" });
         const url = URL.createObjectURL(blob);
         const download = document.createElement("a");
@@ -261,6 +308,88 @@ document.addEventListener("DOMContentLoaded", async () => {
         setMessage("Backup da fila baixado neste dispositivo.");
     });
 
+    exportFullBackupButton.addEventListener("click", () => {
+        const backup = {
+            exported_at: new Date().toISOString(),
+            notice: "Arquivo privado. Contém dados pessoais de clientes e informações financeiras. Os arquivos de imagem do Supabase Storage não são incluídos.",
+            orders: cachedOrders,
+            payments: cachedPayments,
+            published_gallery: cachedGalleryItems
+        };
+        const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const download = document.createElement("a");
+        download.href = url;
+        download.download = `zoolixianas-backup-dados-${new Date().toISOString().slice(0, 10)}.json`;
+        download.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        setMessage("Backup completo baixado neste dispositivo. Guarde em local privado.");
+    });
+
+    function createOrderFinance(order) {
+        const section = document.createElement("section");
+        section.className = "order-finances";
+        const title = document.createElement("h5"); title.textContent = "Pagamentos · área privada";
+        const agreedForm = document.createElement("form"); agreedForm.className = "order-finance-form agreed-value-form";
+        const agreedLabel = document.createElement("label"); agreedLabel.textContent = "Valor combinado (R$)";
+        const agreed = document.createElement("input"); agreed.type = "number"; agreed.min = "0"; agreed.step = "0.01"; agreed.inputMode = "decimal"; agreed.value = order.agreed_amount ?? "";
+        agreed.setAttribute("aria-label", `Valor combinado para ${order.client_name}`);
+        const saveAgreed = document.createElement("button"); saveAgreed.type = "submit"; saveAgreed.textContent = "Salvar valor";
+        agreedForm.append(agreedLabel, agreed, saveAgreed);
+        agreedForm.addEventListener("submit", async event => {
+            event.preventDefault(); saveAgreed.disabled = true;
+            const amount = agreed.value === "" ? null : Number(agreed.value);
+            const { error } = await client.from("commission_orders").update({ agreed_amount: amount }).eq("id", order.id);
+            saveAgreed.disabled = false;
+            if (error) { setMessage("Não foi possível salvar o valor. Aplique supabase/business-tools.sql.", true); return; }
+            order.agreed_amount = amount; setMessage("Valor combinado salvo no painel privado."); renderFinanceSummary();
+        });
+
+        const paymentForm = document.createElement("form"); paymentForm.className = "order-finance-form payment-entry-form";
+        const amountLabel = document.createElement("label"); amountLabel.textContent = "Recebido (R$)";
+        const amount = document.createElement("input"); amount.type = "number"; amount.min = "0.01"; amount.step = "0.01"; amount.inputMode = "decimal"; amount.required = true; amount.placeholder = "0,00";
+        amount.setAttribute("aria-label", `Valor recebido no pedido de ${order.client_name}`);
+        const dateLabel = document.createElement("label"); dateLabel.textContent = "Data";
+        const paidAt = document.createElement("input"); paidAt.type = "date"; const now = new Date(); paidAt.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`; paidAt.required = true;
+        paidAt.setAttribute("aria-label", `Data do pagamento de ${order.client_name}`);
+        const methodLabel = document.createElement("label"); methodLabel.textContent = "Forma";
+        const method = document.createElement("select");
+        [["Pix", "Pix"], ["Cartão", "Cartão"], ["Transferência", "Transferência"], ["Dinheiro", "Dinheiro"], ["Outro", "Outro"]].forEach(([value, label]) => {
+            const option = document.createElement("option"); option.value = value; option.textContent = label; method.append(option);
+        });
+        const addPayment = document.createElement("button"); addPayment.type = "submit"; addPayment.textContent = "Registrar recebimento";
+        paymentForm.append(amountLabel, amount, dateLabel, paidAt, methodLabel, method, addPayment);
+        paymentForm.addEventListener("submit", async event => {
+            event.preventDefault(); addPayment.disabled = true;
+            const { error } = await client.from("commission_payments").insert({ order_id: order.id, amount: Number(amount.value), paid_at: paidAt.value, payment_method: method.value });
+            addPayment.disabled = false;
+            if (error) { setMessage("Não foi possível registrar o pagamento. Confira se supabase/business-tools.sql foi aplicado.", true); return; }
+            setMessage("Recebimento registrado no histórico privado."); await loadOrders();
+        });
+
+        const received = order.payments.reduce((sum, item) => sum + Number(item.amount), 0);
+        const remaining = Math.max(0, Number(order.agreed_amount || 0) - received);
+        const totals = document.createElement("p"); totals.className = "order-finance-totals";
+        totals.textContent = `Recebido: ${money(received)} · Falta: ${money(remaining)}`;
+        const history = document.createElement("ul"); history.className = "payment-history";
+        order.payments.forEach(payment => {
+            const item = document.createElement("li");
+            const caption = document.createElement("span"); caption.textContent = `${new Date(`${payment.paid_at}T12:00:00`).toLocaleDateString("pt-BR")} · ${payment.payment_method} · ${money(payment.amount)}`;
+            const remove = document.createElement("button"); remove.type = "button"; remove.textContent = "Remover"; remove.setAttribute("aria-label", `Remover recebimento de ${money(payment.amount)}`);
+            remove.addEventListener("click", async () => {
+                if (!window.confirm(`Apagar o registro de ${money(payment.amount)} recebido em ${new Date(`${payment.paid_at}T12:00:00`).toLocaleDateString("pt-BR")}?`)) return;
+                remove.disabled = true;
+                const { error } = await client.from("commission_payments").delete().eq("id", payment.id);
+                if (error) { remove.disabled = false; setMessage("Não foi possível remover esse recebimento.", true); return; }
+                setMessage("Registro de recebimento removido."); await loadOrders();
+            });
+            item.append(caption, remove); history.append(item);
+        });
+        if (!order.payments.length) { const empty = document.createElement("li"); empty.textContent = "Nenhum recebimento registrado."; history.append(empty); }
+        section.append(title, agreedForm, paymentForm, totals, history);
+        return section;
+    }
+
     function renderOrders() {
         const container = document.querySelector("#orders-list");
         container.replaceChildren();
@@ -269,7 +398,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             const isStale = (Date.now() - new Date(order.updated_at || order.created_at).getTime()) >= 7 * 86400000;
             const matchesStatus = ordersFilter.value === "all" || (ordersFilter.value === "stale" ? isStale : order.status === ordersFilter.value);
             const matchesArtist = ordersArtistFilter.value === "all" || (order.artist_name || "Sem atribuição") === ordersArtistFilter.value;
-            const searchable = `${order.client_name} ${order.tracking_code || ""}`.toLocaleLowerCase("pt-BR");
+            const searchable = `${order.client_name} ${order.tracking_code || ""} ${order.client_email || ""}`.toLocaleLowerCase("pt-BR");
             return matchesStatus && matchesArtist && searchable.includes(query);
         });
         if (!filtered.length) {
@@ -293,12 +422,33 @@ document.addEventListener("DOMContentLoaded", async () => {
             const contact = document.createElement("p");
             contact.className = "order-contact";
             contact.textContent = order.client_contact;
+            const emailInfo = document.createElement("span");
+            emailInfo.className = "order-client-email-note";
+            emailInfo.textContent = order.client_email
+                ? `${order.client_email} · ${order.email_updates_enabled ? "avisos autorizados" : "sem autorização para avisos"}`
+                : "Sem e-mail para atualizações";
             const type = document.createElement("p");
             type.className = "order-type";
             type.textContent = order.art_type;
             const artist = document.createElement("p");
             artist.className = "order-artist-assignment";
             artist.textContent = `Artista responsável: ${order.artist_name || "Sem atribuição"}`;
+            if (canManageAll) {
+                const assignment = document.createElement("select");
+                assignment.className = "order-assignment-select";
+                assignment.setAttribute("aria-label", `Alterar artista responsável pelo pedido de ${order.client_name}`);
+                [["Sem atribuição", "Sem atribuição"], ["Ynnley", "Ynnley"], ["Bonny", "Bonny"]].forEach(([value, label]) => {
+                    const option = document.createElement("option"); option.value = value; option.textContent = label;
+                    option.selected = (order.artist_name || "Sem atribuição") === value; assignment.append(option);
+                });
+                assignment.addEventListener("change", async () => {
+                    assignment.disabled = true;
+                    const { error } = await client.from("commission_orders").update({ artist_name: assignment.value }).eq("id", order.id);
+                    if (error) { assignment.disabled = false; setMessage("Não foi possível alterar a atribuição. Confira as permissões e a migração de artistas.", true); return; }
+                    setMessage(`Pedido atribuído a ${assignment.value}.`); await loadOrders();
+                });
+                artist.append(document.createTextNode(" · "), assignment);
+            }
             const summary = document.createElement("p");
             summary.className = "order-summary";
             summary.textContent = order.summary;
@@ -416,7 +566,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                 requestsDetails.append(requestCard);
             });
 
-            details.append(heading, badge, contact, type, artist, summary, date, lastUpdated, tracking, historyDetails, requestsDetails);
+            const finance = createOrderFinance(order);
+            details.append(heading, badge, contact, emailInfo, type, artist, summary, date, lastUpdated, tracking, finance, historyDetails, requestsDetails);
 
             const select = document.createElement("select");
             select.dataset.status = order.status;
@@ -440,7 +591,13 @@ document.addEventListener("DOMContentLoaded", async () => {
                 } else {
                     order.status = newStatus;
                     order.updated_at = new Date().toISOString();
-                    setMessage(`Etapa atualizada: ${select.selectedOptions[0].textContent}.`);
+                    const { data: emailResult, error: emailError } = await client.functions.invoke("notify-order-status", { body: { orderId: order.id } });
+                    const label = select.selectedOptions[0].textContent;
+                    setMessage(emailError
+                        ? `Etapa atualizada (${label}), mas o aviso por e-mail ainda não foi enviado. Confira a configuração do serviço de e-mail.`
+                        : emailResult?.sent
+                            ? `Etapa atualizada (${label}) e aviso enviado por e-mail.`
+                            : `Etapa atualizada (${label}). ${emailResult?.skipped ? "E-mail não autorizado ou não informado; nenhuma mensagem foi enviada." : ""}`);
                     await loadOrders();
                 }
             });
@@ -504,12 +661,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         container.setAttribute("aria-busy", "true");
         const { data, error } = await client
             .from("commission_orders")
-            .select("id, client_name, client_contact, art_type, summary, status, created_at, updated_at, tracking_code, estimated_delivery, artist_name")
+            .select("id, client_name, client_contact, client_email, email_updates_enabled, art_type, summary, status, created_at, updated_at, tracking_code, estimated_delivery, artist_name, agreed_amount")
             .order("created_at", { ascending: false });
         container.setAttribute("aria-busy", "false");
         if (error) {
-            container.textContent = error.message?.includes("estimated_delivery")
-                ? "Aplique supabase/order-tracking-details.sql no SQL Editor do Supabase."
+            container.textContent = error.message?.includes("client_email") || error.message?.includes("email_updates_enabled") || error.message?.includes("agreed_amount")
+                ? "Aplique supabase/business-tools.sql no SQL Editor do Supabase para ativar e-mail e controle financeiro."
+                : error.message?.includes("estimated_delivery")
+                    ? "Aplique supabase/order-tracking-details.sql no SQL Editor do Supabase."
                 : error.message?.includes("artist_name")
                     ? "Aplique supabase/studio-workflow-upgrades.sql no SQL Editor do Supabase."
                     : "Não foi possível carregar os pedidos.";
@@ -518,13 +677,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         const orderIds = (data || []).map(order => order.id);
         let historyByOrder = new Map();
         let requestsByOrder = new Map();
+        let paymentsByOrder = new Map();
         if (orderIds.length) {
-            const [historyResult, requestsResult] = await Promise.all([
+            const [historyResult, requestsResult, paymentsResult] = await Promise.all([
                 client.from("commission_order_history").select("order_id, status, changed_at").in("order_id", orderIds).order("changed_at", { ascending: true }),
-                client.from("commission_client_requests").select("id, order_id, request_type, message, state, created_at, handled_at").in("order_id", orderIds).order("created_at", { ascending: false })
+                client.from("commission_client_requests").select("id, order_id, request_type, message, state, created_at, handled_at").in("order_id", orderIds).order("created_at", { ascending: false }),
+                client.from("commission_payments").select("id, order_id, amount, paid_at, payment_method, note").in("order_id", orderIds).order("paid_at", { ascending: false })
             ]);
-            if (historyResult.error || requestsResult.error) {
-                setMessage("Aplique supabase/studio-workflow-upgrades.sql para ativar o histórico e as solicitações dos clientes.", true);
+            if (historyResult.error || requestsResult.error || paymentsResult.error) {
+                setMessage(paymentsResult.error
+                    ? "Aplique supabase/business-tools.sql para ativar o controle de recebimentos."
+                    : "Aplique supabase/studio-workflow-upgrades.sql para ativar o histórico e as solicitações dos clientes.", true);
             }
             (historyResult.data || []).forEach(item => {
                 if (!historyByOrder.has(item.order_id)) historyByOrder.set(item.order_id, []);
@@ -534,12 +697,19 @@ document.addEventListener("DOMContentLoaded", async () => {
                 if (!requestsByOrder.has(item.order_id)) requestsByOrder.set(item.order_id, []);
                 requestsByOrder.get(item.order_id).push(item);
             });
-        }
+            cachedPayments = paymentsResult.data || [];
+            cachedPayments.forEach(item => {
+                if (!paymentsByOrder.has(item.order_id)) paymentsByOrder.set(item.order_id, []);
+                paymentsByOrder.get(item.order_id).push(item);
+            });
+        } else cachedPayments = [];
         cachedOrders = (data || []).map(order => ({
             ...order,
             history: historyByOrder.get(order.id) || [],
-            client_requests: requestsByOrder.get(order.id) || []
+            client_requests: requestsByOrder.get(order.id) || [],
+            payments: paymentsByOrder.get(order.id) || []
         }));
+        renderFinanceSummary();
         renderOrdersOverview();
         renderOrders();
         await loadGalleryItems();
@@ -659,14 +829,29 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.querySelector("#order-form").addEventListener("submit", async event => {
         event.preventDefault();
         const form = event.currentTarget;
+        const email = document.querySelector("#order-client-email").value.trim();
+        const emailConsent = document.querySelector("#order-email-consent").checked;
+        if (email && !emailConsent) {
+            setMessage("Marque a autorização do cliente antes de ativar avisos por e-mail.", true);
+            document.querySelector("#order-email-consent").focus();
+            return;
+        }
+        if (emailConsent && !email) {
+            setMessage("Informe o e-mail do cliente ou retire a autorização por e-mail.", true);
+            document.querySelector("#order-client-email").focus();
+            return;
+        }
         const fields = {
             client_name: document.querySelector("#order-client").value.trim(),
             client_contact: document.querySelector("#order-contact").value.trim(),
+            client_email: email || null,
+            email_updates_enabled: emailConsent && Boolean(email),
             art_type: document.querySelector("#order-type").value.trim(),
             summary: document.querySelector("#order-summary").value.trim(),
             status: "received",
-            artist_name: document.querySelector("#order-artist").value,
-            estimated_delivery: document.querySelector("#order-estimate").value || null
+            artist_name: assignedArtistName && !canManageAll ? assignedArtistName : document.querySelector("#order-artist").value,
+            estimated_delivery: document.querySelector("#order-estimate").value || null,
+            agreed_amount: document.querySelector("#order-agreed-amount").value === "" ? null : Number(document.querySelector("#order-agreed-amount").value)
         };
         const { data: newOrder, error } = await client.from("commission_orders").insert(fields).select("tracking_code").single();
         if (error) {
@@ -681,6 +866,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     document.querySelector("#availability-form").setAttribute("aria-label", "Atualizar disponibilidade pública");
+    const emailField = document.querySelector("#order-client-email");
+    const emailConsentField = document.querySelector("#order-email-consent");
+    emailField.addEventListener("input", () => {
+        emailConsentField.required = Boolean(emailField.value.trim());
+        if (!emailField.value.trim()) emailConsentField.checked = false;
+    });
     const { data: sessionData } = await client.auth.getSession();
     if (sessionData.session && !passwordRecoveryMode) await continueSession();
 });
