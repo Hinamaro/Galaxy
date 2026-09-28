@@ -67,13 +67,52 @@ Nome, contatos, resumo e pagamentos ficam privados. Cada conta vinculada a Ynnle
 
 ## Ativar avisos automáticos por e-mail
 
-O código do envio está em `supabase/functions/notify-order-status/index.ts`. É necessário implantar essa função no Supabase, criar uma chave em um provedor de envio de e-mail e configurar um domínio/remetente autorizado por esse provedor. No painel Supabase, abra **Edge Functions → Deploy a new function → Via Editor**, crie a função com o nome `notify-order-status` e copie o conteúdo desse arquivo para o editor. O Supabase também documenta implantação de funções pelo Dashboard e a configuração de segredos [na documentação de Edge Functions](https://supabase.com/docs/guides/functions/quickstart-dashboard).
+O envio foi preparado com EmailJS ligado ao endereço `MikiMwk@hotmail.com`. A artista inicia o envio pelo painel; uma Edge Function no Supabase confirma a sessão e a autorização do cliente antes de solicitar o e-mail. O navegador não recebe configurações de envio.
 
-Depois, abra **Edge Functions → Secrets** e cadastre `RESEND_API_KEY`, `MAIL_FROM` (remetente verificado, por exemplo `Zoolixianas <avisos@seudominio.com>`) e `SITE_URL` (endereço HTTPS publicado, sem barra final). Não coloque a chave do provedor no HTML, em `backend-config.js` ou no Git. O código usa o token da sessão da artista para respeitar as políticas de acesso do pedido.
+### 1. Conectar o Hotmail no EmailJS
+
+1. Crie/acesse sua conta em [EmailJS](https://www.emailjs.com/) e abra **Email Services → Add New Service**.
+2. Escolha a integração Microsoft/Outlook disponível e conecte `MikiMwk@hotmail.com` pela tela oficial da Microsoft. Não informe sua senha em nenhum formulário do site Zoolixianas. Se o EmailJS não aceitar o endereço Hotmail nessa integração, pare e me avise; não tente contornar as proteções da Microsoft.
+3. Envie um e-mail de teste pela página do serviço para confirmar que a conexão foi aceita. As contas pessoais são adequadas apenas para baixo volume e podem ter limites do provedor.
+
+### 2. Criar o modelo de e-mail
+
+Em **Email Templates**, crie um modelo. No campo de destinatário (**To Email**), coloque `{{to_email}}`; use `{{subject}}` no assunto. Um corpo HTML simples pode ser:
+
+```html
+<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;padding:28px;color:#482651;background:#fff8fc;border:1px solid #eed6e8;border-radius:18px">
+  <p style="color:#a34f80;font-weight:bold">ZOOLIXIANAS · COMISSÕES</p>
+  <h1>Oi, {{client_name}}!</h1>
+  <p>Sua comissão <strong>{{art_type}}</strong> recebeu uma atualização:</p>
+  <p style="padding:14px;background:#f8eafa;border-radius:12px"><strong>{{status_label}}</strong></p>
+  <p>Previsão de entrega: <strong>{{eta}}</strong></p>
+  <p><a href="{{tracking_url}}" style="display:inline-block;padding:12px 18px;background:#d987b5;color:white;text-decoration:none;border-radius:999px">Acompanhar pedido</a></p>
+  <p style="color:#88778b;font-size:13px">Você recebe este aviso porque autorizou atualizações por e-mail.</p>
+</div>
+```
+
+O remetente deve ser o endereço conectado (`MikiMwk@hotmail.com`). Salve o modelo e copie os identificadores do serviço e do modelo. Em **Account → General**, copie a **Public Key**. Não compartilhe senha, chave privada ou token da Microsoft.
+
+### 3. Configurar e publicar no Supabase
+
+O código da função está em `supabase/functions/notify-order-status/index.ts`. No painel Supabase, abra **Edge Functions → Deploy a new function → Via Editor**, crie `notify-order-status` e copie o arquivo para o editor. O Supabase explica esse processo [na documentação oficial](https://supabase.com/docs/guides/functions/quickstart-dashboard).
+
+Em **Edge Functions → Secrets**, cadastre estes nomes com os valores mostrados pelo EmailJS e o endereço HTTPS publicado do site:
+
+| Nome do segredo | Valor |
+| --- | --- |
+| `EMAILJS_PUBLIC_KEY` | Public Key da sua conta EmailJS |
+| `EMAILJS_SERVICE_ID` | ID do serviço conectado ao Hotmail |
+| `EMAILJS_TEMPLATE_ID` | ID do modelo criado acima |
+| `SITE_URL` | URL HTTPS do site publicado, sem barra final |
+
+Não coloque esses valores no HTML, no `backend-config.js` nem em repositórios públicos. O código usa a sessão da artista para consultar o pedido e só tenta enviar quando o cliente autorizou avisos.
 
 Na criação do pedido, informe o e-mail apenas se a pessoa autorizar receber atualizações. Para pedidos antigos, abra a ficha, preencha **Avisos por e-mail ao cliente**, marque a autorização e salve. Cada mudança de etapa dispara um aviso com a etapa e o link público de acompanhamento; a ficha também oferece **Reenviar e-mail de status** para uma tentativa manual. Se o envio falhar, o painel mostra o motivo provável e mantém a etapa salva.
 
-Depois de implantar a função e configurar os três segredos, atualize o site na Vercel com o pacote novo. Faça um teste de ponta a ponta com um pedido de teste e um endereço da equipe: salve o e-mail/autorização, mude a etapa e confira a caixa de entrada. Se não chegar, veja **Edge Functions → notify-order-status → Logs** e tente o botão de reenvio na ficha. Uma etapa pode aparecer atualizada mesmo quando o serviço de e-mail recusou o envio; o painel agora diferencia esses resultados.
+Na criação do pedido, informe o e-mail apenas se a pessoa autorizar receber atualizações. Para pedidos antigos, abra a ficha, preencha **Avisos por e-mail ao cliente**, marque a autorização e salve. Cada mudança de etapa dispara um aviso; a ficha também oferece **Reenviar e-mail de status**. Se falhar, o painel mostra o motivo provável e mantém a etapa salva.
+
+Depois de implantar a função e cadastrar os quatro segredos, publique a versão atualizada do site na Vercel. Faça um teste com um pedido de teste e um e-mail da equipe; confira também spam/lixo eletrônico. Se não chegar, consulte **Edge Functions → notify-order-status → Logs** e tente o reenvio. Uma etapa pode aparecer atualizada mesmo quando o serviço de e-mail recusou o envio. Para grande volume, troque o serviço pessoal por um provedor transacional; EmailJS indica integrações pessoais para desenvolvimento ou volume muito baixo ([orientação do EmailJS](https://www.emailjs.com/docs/user-guide/connecting-email-services/)).
 
 ## Pagamentos e cópias de segurança
 

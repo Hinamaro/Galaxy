@@ -27,8 +27,9 @@ Deno.serve(async request => {
   let publishableKey = "";
   try { publishableKey = publishableKeys ? JSON.parse(publishableKeys).default || "" : ""; } catch { publishableKey = ""; }
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || publishableKey;
-  const resendKey = Deno.env.get("RESEND_API_KEY");
-  const from = Deno.env.get("MAIL_FROM");
+  const emailJsPublicKey = Deno.env.get("EMAILJS_PUBLIC_KEY");
+  const emailJsServiceId = Deno.env.get("EMAILJS_SERVICE_ID");
+  const emailJsTemplateId = Deno.env.get("EMAILJS_TEMPLATE_ID");
   const siteUrlValue = Deno.env.get("SITE_URL") || "";
   if (!authorization || !supabaseUrl || !anonKey) return Response.json({ error: "Sessão ausente." }, { status: 401, headers: corsHeaders });
 
@@ -50,7 +51,12 @@ Deno.serve(async request => {
   if (!order.email_updates_enabled || !order.client_email) {
     return Response.json({ skipped: true, reason: "E-mail não autorizado para atualizações." }, { headers: corsHeaders });
   }
-  const missingSettings = [!resendKey && "RESEND_API_KEY", !from && "MAIL_FROM", !siteUrlValue && "SITE_URL"].filter(Boolean);
+  const missingSettings = [
+    !emailJsPublicKey && "EMAILJS_PUBLIC_KEY",
+    !emailJsServiceId && "EMAILJS_SERVICE_ID",
+    !emailJsTemplateId && "EMAILJS_TEMPLATE_ID",
+    !siteUrlValue && "SITE_URL",
+  ].filter(Boolean);
   if (missingSettings.length) return Response.json({ error: `Falta configurar nos segredos do Supabase: ${missingSettings.join(", ")}.` }, { status: 503, headers: corsHeaders });
   let siteUrl: URL;
   try { siteUrl = new URL(siteUrlValue); }
@@ -67,22 +73,28 @@ Deno.serve(async request => {
   const safeLabel = escapeHtml(label);
   const safeEta = escapeHtml(eta);
   const safeUrl = escapeHtml(trackingUrl);
-  const response = await fetch("https://api.resend.com/emails", {
+  const response = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
     method: "POST",
-    headers: { Authorization: `Bearer ${resendKey}`, "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      from,
-      to: [order.client_email],
-      subject: `Atualização da sua comissão: ${label}`,
-      text: `Oi, ${order.client_name}!\n\nSua comissão (${order.art_type}) foi atualizada: ${label}.\nPrevisão de entrega: ${eta}.\n\nAcompanhe: ${trackingUrl}`,
-      html: `<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;padding:28px;color:#482651;background:#fff8fc;border:1px solid #eed6e8;border-radius:18px"><p style="color:#a34f80;font-weight:bold">ZOOLIXIANAS · COMISSÕES</p><h1 style="font-size:24px">Oi, ${name}!</h1><p>Sua comissão <strong>${artType}</strong> recebeu uma atualização:</p><p style="padding:14px;background:#f8eafa;border-radius:12px"><strong>${safeLabel}</strong></p><p>Previsão de entrega: <strong>${safeEta}</strong></p><p><a href="${safeUrl}" style="display:inline-block;padding:12px 18px;background:#d987b5;color:white;text-decoration:none;border-radius:999px">Acompanhar pedido</a></p><p style="color:#88778b;font-size:13px">Este aviso foi enviado porque você autorizou atualizações por e-mail.</p></div>`,
+      user_id: emailJsPublicKey,
+      service_id: emailJsServiceId,
+      template_id: emailJsTemplateId,
+      template_params: {
+        to_email: order.client_email,
+        client_name: name,
+        art_type: artType,
+        status_label: safeLabel,
+        eta: safeEta,
+        tracking_url: safeUrl,
+        subject: `Atualização da sua comissão: ${label}`,
+      },
     }),
   });
   if (!response.ok) {
     let providerDetail = `HTTP ${response.status}`;
     try {
-      const body = await response.json();
-      providerDetail = String(body?.message || body?.name || body?.error || providerDetail).slice(0, 240);
+      providerDetail = (await response.text()).slice(0, 240) || providerDetail;
     } catch { /* O provedor pode responder sem JSON. */ }
     return Response.json({ error: `O provedor recusou o envio (${response.status}): ${providerDetail}` }, { status: 502, headers: corsHeaders });
   }

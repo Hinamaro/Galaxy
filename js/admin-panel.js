@@ -197,8 +197,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (status === 404) return { error: "A função de e-mail não está publicada no Supabase. Implante notify-order-status." };
         if (status === 401) return { error: "A sessão expirou ou a função recusou a autenticação. Saia e entre novamente no painel." };
         if (status === 403) return { error: "A conta atual não tem acesso a este pedido para enviar o aviso." };
-        if (status === 503) return { error: detail || "Falta configurar RESEND_API_KEY e MAIL_FROM nos segredos da Edge Function." };
-        if (status === 502) return { error: detail || "O serviço de e-mail recusou o envio. Confira domínio/remetente e a chave do provedor." };
+        if (status === 503) return { error: detail || "Faltam configurações do EmailJS ou o endereço publicado do site nos segredos da Edge Function." };
+        if (status === 502) return { error: detail || "O EmailJS recusou o envio. Confira a conexão do e-mail, o modelo e os identificadores configurados." };
         if (error.name === "FunctionsFetchError" || error.name === "TypeError") {
             return { error: "Não foi possível alcançar a função. Confira se ela foi publicada e se o projeto Supabase está acessível." };
         }
