@@ -45,12 +45,18 @@ Deno.serve(async request => {
   if (!orderId) return Response.json({ error: "Pedido inválido." }, { status: 400, headers: corsHeaders });
 
   const { data: order, error } = await supabase.from("commission_orders")
-    .select("id, client_name, client_email, email_updates_enabled, artist_email_message, art_type, status, tracking_code, estimated_delivery")
+    .select("id, client_name, client_email, email_updates_enabled, artist_email_message, artist_email_messages, art_type, status, tracking_code, estimated_delivery")
     .eq("id", orderId).single();
   if (error || !order) return Response.json({ error: "Pedido não encontrado ou sem acesso." }, { status: 404, headers: corsHeaders });
   if (!order.email_updates_enabled || !order.client_email) {
     return Response.json({ skipped: true, reason: "E-mail não autorizado para atualizações." }, { headers: corsHeaders });
   }
+  const recordAttempt = async (sent: boolean, detail: string | null) => {
+    // Email delivery should not fail just because optional audit logging did.
+    await supabase.from("commission_email_notifications").insert({
+      order_id: order.id, status: order.status, sent, detail: detail?.slice(0, 500) || null,
+    });
+  };
   const missingSettings = [
     !emailJsPublicKey && "EMAILJS_PUBLIC_KEY",
     !emailJsAccessToken && "EMAILJS_ACCESS_TOKEN",
@@ -69,7 +75,9 @@ Deno.serve(async request => {
   const eta = order.estimated_delivery
     ? new Date(`${order.estimated_delivery}T12:00:00Z`).toLocaleDateString("pt-BR", { timeZone: "UTC" })
     : "";
-  const artistMessage = String(order.artist_email_message || "").trim().slice(0, 500);
+  const perStatusMessages = order.artist_email_messages && typeof order.artist_email_messages === "object"
+    ? order.artist_email_messages as Record<string, unknown> : {};
+  const artistMessage = String(perStatusMessages[order.status] ?? order.artist_email_message ?? "").trim().slice(0, 500);
   const statusColor = statusColors[order.status] || "#a174bb";
   const response = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
     method: "POST",
@@ -100,7 +108,9 @@ Deno.serve(async request => {
     try {
       providerDetail = (await response.text()).slice(0, 240) || providerDetail;
     } catch { /* O provedor pode responder sem JSON. */ }
+    await recordAttempt(false, `O provedor recusou o envio (HTTP ${response.status}).`);
     return Response.json({ error: `O provedor recusou o envio (${response.status}): ${providerDetail}` }, { status: 502, headers: corsHeaders });
   }
+  await recordAttempt(true, null);
   return Response.json({ sent: true }, { headers: corsHeaders });
 });

@@ -11,7 +11,7 @@
 
 Antes de publicar a versão anterior, o projeto executou `supabase/public-tracking-and-order-delete.sql`: essa atualização gera códigos aleatórios, libera a remoção apenas para artistas autorizadas e permite consultar por código dados limitados do pedido. Contato, nome e resumo não são retornados à página pública.
 
-Para habilitar os recursos já preparados, abra **SQL Editor → New query** e execute, nesta ordem, `supabase/studio-workflow-upgrades.sql`, `supabase/business-tools.sql` e `supabase/email-notification-message.sql`. Faça isso uma vez, depois da migração de códigos/exclusão já executada. A primeira cria histórico, solicitações e galeria autorizada; a segunda cria acesso por artista, pagamentos e campos de comunicação; a terceira ativa a mensagem opcional privada incluída nos e-mails. `order-tracking-details.sql` é uma versão anterior da previsão e não precisa ser executada separadamente.
+Para habilitar os recursos já preparados, abra **SQL Editor → New query** e execute, nesta ordem, `supabase/studio-workflow-upgrades.sql`, `supabase/business-tools.sql` e `supabase/email-notification-message.sql`. Faça isso uma vez, depois da migração de códigos/exclusão já executada. A primeira cria histórico, solicitações e galeria autorizada; a segunda cria acesso por artista, pagamentos e campos de comunicação; a terceira ativa mensagens privadas por etapa e o histórico de tentativas de e-mail, visível somente às artistas autorizadas. `order-tracking-details.sql` é uma versão anterior da previsão e não precisa ser executada separadamente.
 
 ## O que falta antes do primeiro acesso
 

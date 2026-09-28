@@ -175,6 +175,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         delivered: "Sua comissão foi finalizada e entregue. Obrigada pelo apoio!",
         cancelled: "O pedido foi cancelado. Se quiser conversar sobre isso, estou à disposição."
     };
+    const emailSuggestions = {
+        received: "Seu pedido foi recebido! Vou revisar os detalhes e já retorno com as informações.",
+        quote: "Preparei o orçamento da sua comissão. Se quiser ajustar algum detalhe, pode me responder por aqui.",
+        payment: "Estou aguardando a confirmação do pagamento combinado. Se já pagou, pode desconsiderar este aviso.",
+        queue: "Seu pedido está na fila. Avisarei quando começar a trabalhar nele.",
+        sketch: "O esboço da sua arte está pronto; fique à vontade para enviar seus comentários.",
+        approval: "Sua aprovação ou sugestões me ajudam a seguir para a finalização.",
+        finalizing: "Sua arte está na etapa final. Em breve enviarei a versão concluída.",
+        delivered: "Sua comissão foi concluída. Obrigada por apoiar meu trabalho!",
+        cancelled: "O pedido foi cancelado. Se precisar conversar sobre isso, estou à disposição."
+    };
 
     async function sendStatusEmail(order) {
         if (!order.email_updates_enabled || !order.client_email) {
@@ -460,12 +471,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     function createOrderEmailMessage(order) {
         const section = document.createElement("section");
         section.className = "order-email-message";
+        const statusLabel = document.createElement("label");
+        statusLabel.textContent = "Mensagem para a etapa";
+        const statusPicker = document.createElement("select");
+        statusPicker.setAttribute("aria-label", "Escolher etapa para editar a mensagem do e-mail");
+        orderStatuses.forEach(([value, label]) => { const option = document.createElement("option"); option.value = value; option.textContent = label; statusPicker.append(option); });
+        statusPicker.value = order.status;
+        const suggestionPicker = document.createElement("select");
+        suggestionPicker.setAttribute("aria-label", "Escolher uma mensagem pronta");
+        const suggestionPlaceholder = document.createElement("option"); suggestionPlaceholder.value = ""; suggestionPlaceholder.textContent = "Usar uma sugestão pronta…"; suggestionPicker.append(suggestionPlaceholder);
         const label = document.createElement("label");
-        label.textContent = "Mensagem opcional neste e-mail";
+        label.textContent = "Texto que acompanhará esta etapa";
         const message = document.createElement("textarea");
         message.rows = 2;
         message.maxLength = 500;
-        message.value = order.artist_email_message || "";
+        const getStatusMessage = status => order.artist_email_messages?.[status] ?? (status === order.status ? order.artist_email_message : "") ?? "";
+        message.value = getStatusMessage(order.status);
         message.placeholder = "Ex.: Se quiser mudar algum detalhe, me responda por este e-mail.";
         message.setAttribute("aria-label", `Mensagem opcional no e-mail do pedido de ${order.client_name}`);
         const save = document.createElement("button");
@@ -473,21 +494,54 @@ document.addEventListener("DOMContentLoaded", async () => {
         save.className = "save-email-message";
         save.textContent = "Salvar mensagem";
         const help = document.createElement("small");
-        help.textContent = "Esta mensagem vai junto com os avisos por e-mail e fica privada no painel.";
+        help.textContent = "Cada etapa pode ter seu próprio texto. A mensagem fica privada no painel e só vai ao cliente junto do aviso.";
+        const previewButton = document.createElement("button"); previewButton.type = "button"; previewButton.textContent = "Pré-visualizar e-mail"; previewButton.className = "email-preview-toggle";
+        const preview = document.createElement("div"); preview.className = "email-preview"; preview.hidden = true;
+        const fillSuggestions = () => { suggestionPicker.replaceChildren(suggestionPlaceholder.cloneNode(true)); const suggestion = emailSuggestions[statusPicker.value]; if (suggestion) { const option = document.createElement("option"); option.value = suggestion; option.textContent = "Mensagem sugerida para esta etapa"; suggestionPicker.append(option); } };
+        statusPicker.addEventListener("change", () => { message.value = getStatusMessage(statusPicker.value); fillSuggestions(); preview.hidden = true; });
+        suggestionPicker.addEventListener("change", () => { if (suggestionPicker.value) message.value = suggestionPicker.value; });
+        fillSuggestions();
+        previewButton.addEventListener("click", () => {
+            preview.replaceChildren();
+            const title = document.createElement("strong"); title.textContent = `Atualização da sua comissão: ${orderStatuses.find(([value]) => value === statusPicker.value)?.[1] || "Pedido atualizado"}`;
+            const greeting = document.createElement("p"); greeting.textContent = `Olá, ${order.client_name}!`;
+            const info = document.createElement("p"); info.textContent = `${order.art_type} · ${order.tracking_code ? `Código ${order.tracking_code}` : "Pedido em andamento"}`;
+            const text = document.createElement("p"); text.textContent = message.value.trim() || "Nenhuma mensagem personalizada para esta etapa.";
+            const link = document.createElement("span"); link.textContent = "O e-mail também terá o botão para acompanhar o pedido.";
+            preview.append(title, greeting, info, text, link); preview.hidden = false;
+        });
         save.addEventListener("click", async () => {
             save.disabled = true;
             const value = message.value.trim();
+            const messages = { ...(order.artist_email_messages || {}), [statusPicker.value]: value };
             const { error } = await client.from("commission_orders")
-                .update({ artist_email_message: value || null }).eq("id", order.id);
+                .update({ artist_email_messages: messages }).eq("id", order.id);
             save.disabled = false;
             if (error) { setMessage("Não foi possível salvar a mensagem. Aplique supabase/email-notification-message.sql no Supabase.", true); return; }
-            order.artist_email_message = value || null;
+            order.artist_email_messages = messages;
+            if (statusPicker.value === order.status) order.artist_email_message = value || null;
             save.textContent = "Mensagem salva";
             setMessage("Mensagem do e-mail salva.");
             window.setTimeout(() => { save.textContent = "Salvar mensagem"; }, 1800);
         });
-        section.append(label, message, save, help);
+        section.append(statusLabel, statusPicker, suggestionPicker, label, message, previewButton, preview, save, help);
         return section;
+    }
+
+    function createEmailHistory(order) {
+        const details = document.createElement("details"); details.className = "email-send-history";
+        const summary = document.createElement("summary"); summary.textContent = `Histórico de e-mails (${order.email_notifications?.length || 0})`; details.append(summary);
+        const list = document.createElement("ul");
+        (order.email_notifications || []).slice(0, 20).forEach(item => {
+            const entry = document.createElement("li"); entry.dataset.sent = String(item.sent);
+            const status = orderStatuses.find(([value]) => value === item.status)?.[1] || item.status;
+            const result = document.createElement("strong"); result.textContent = item.sent ? "Enviado" : "Falhou";
+            const when = document.createElement("time"); when.dateTime = item.created_at; when.textContent = new Date(item.created_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+            const detail = document.createElement("span"); detail.textContent = `${status}${item.detail ? ` · ${item.detail}` : ""}`;
+            entry.append(result, when, detail); list.append(entry);
+        });
+        if (!list.children.length) { const empty = document.createElement("li"); empty.textContent = "Nenhum envio registrado ainda."; list.append(empty); }
+        details.append(list); return details;
     }
 
     function resendCooldownKey(order) {
@@ -619,7 +673,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     const resendEmail = document.createElement("button");
                     resendEmail.type = "button";
                     resendEmail.className = "copy-tracking-code resend-status-email";
-                    resendEmail.textContent = "Reenviar e-mail de status";
+                    resendEmail.textContent = "Enviar atualização agora";
                     const cooldownKey = resendCooldownKey(order);
                     const cooldownUntil = Number(sessionStorage.getItem(cooldownKey) || 0);
                     if (cooldownUntil > Date.now()) {
@@ -627,14 +681,14 @@ document.addEventListener("DOMContentLoaded", async () => {
                         resendEmail.textContent = "E-mail enviado há pouco";
                         window.setTimeout(() => {
                             resendEmail.disabled = false;
-                            resendEmail.textContent = "Reenviar e-mail de status";
+                            resendEmail.textContent = "Enviar atualização agora";
                             sessionStorage.removeItem(cooldownKey);
                         }, cooldownUntil - Date.now());
                     }
                     resendEmail.addEventListener("click", async () => {
                         if (resendEmail.disabled) return;
                         const statusName = orderStatuses.find(([value]) => value === order.status)?.[1] || "atual";
-                        if (!window.confirm(`Enviar novamente o aviso “${statusName}” para ${order.client_email}?`)) return;
+                        if (!window.confirm(`Enviar agora o aviso da etapa “${statusName}” para ${order.client_email}?`)) return;
                         resendEmail.disabled = true;
                         const result = await sendStatusEmail(order);
                         if (result.sent) {
@@ -643,7 +697,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                             resendEmail.textContent = "E-mail enviado há pouco";
                             window.setTimeout(() => {
                                 resendEmail.disabled = false;
-                                resendEmail.textContent = "Reenviar e-mail de status";
+                                resendEmail.textContent = "Enviar atualização agora";
                                 sessionStorage.removeItem(cooldownKey);
                             }, 60000);
                         } else resendEmail.disabled = false;
@@ -711,7 +765,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             const emailPrefs = createOrderEmailPrefs(order);
             const emailMessage = createOrderEmailMessage(order);
             const finance = createOrderFinance(order);
-            details.append(heading, badge, contact, emailInfo, emailPrefs, emailMessage, type, artist, summary, date, lastUpdated, tracking, finance, historyDetails, requestsDetails);
+            details.append(heading, badge, contact, emailInfo, emailPrefs, emailMessage, createEmailHistory(order), type, artist, summary, date, lastUpdated, tracking, finance, historyDetails, requestsDetails);
 
             const select = document.createElement("select");
             select.dataset.status = order.status;
@@ -806,7 +860,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         container.setAttribute("aria-busy", "true");
         const { data, error } = await client
             .from("commission_orders")
-            .select("id, client_name, client_contact, client_email, email_updates_enabled, artist_email_message, art_type, summary, status, created_at, updated_at, tracking_code, estimated_delivery, artist_name, agreed_amount")
+            .select("id, client_name, client_contact, client_email, email_updates_enabled, artist_email_message, artist_email_messages, art_type, summary, status, created_at, updated_at, tracking_code, estimated_delivery, artist_name, agreed_amount")
             .order("created_at", { ascending: false });
         container.setAttribute("aria-busy", "false");
         if (error) {
@@ -823,14 +877,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         let historyByOrder = new Map();
         let requestsByOrder = new Map();
         let paymentsByOrder = new Map();
+        let emailsByOrder = new Map();
         if (orderIds.length) {
-            const [historyResult, requestsResult, paymentsResult] = await Promise.all([
+            const [historyResult, requestsResult, paymentsResult, emailResult] = await Promise.all([
                 client.from("commission_order_history").select("order_id, status, changed_at").in("order_id", orderIds).order("changed_at", { ascending: true }),
                 client.from("commission_client_requests").select("id, order_id, request_type, message, state, created_at, handled_at").in("order_id", orderIds).order("created_at", { ascending: false }),
-                client.from("commission_payments").select("id, order_id, amount, paid_at, payment_method, note").in("order_id", orderIds).order("paid_at", { ascending: false })
+                client.from("commission_payments").select("id, order_id, amount, paid_at, payment_method, note").in("order_id", orderIds).order("paid_at", { ascending: false }),
+                client.from("commission_email_notifications").select("id, order_id, status, sent, detail, created_at").in("order_id", orderIds).order("created_at", { ascending: false })
             ]);
-            if (historyResult.error || requestsResult.error || paymentsResult.error) {
-                setMessage(paymentsResult.error
+            if (historyResult.error || requestsResult.error || paymentsResult.error || emailResult.error) {
+                setMessage(emailResult.error
+                    ? "Aplique supabase/email-notification-message.sql para ativar o histórico privado de e-mails."
+                    : paymentsResult.error
                     ? "Aplique supabase/business-tools.sql para ativar o controle de recebimentos."
                     : "Aplique supabase/studio-workflow-upgrades.sql para ativar o histórico e as solicitações dos clientes.", true);
             }
@@ -847,12 +905,14 @@ document.addEventListener("DOMContentLoaded", async () => {
                 if (!paymentsByOrder.has(item.order_id)) paymentsByOrder.set(item.order_id, []);
                 paymentsByOrder.get(item.order_id).push(item);
             });
+            (emailResult.data || []).forEach(item => { if (!emailsByOrder.has(item.order_id)) emailsByOrder.set(item.order_id, []); emailsByOrder.get(item.order_id).push(item); });
         } else cachedPayments = [];
         cachedOrders = (data || []).map(order => ({
             ...order,
             history: historyByOrder.get(order.id) || [],
             client_requests: requestsByOrder.get(order.id) || [],
-            payments: paymentsByOrder.get(order.id) || []
+            payments: paymentsByOrder.get(order.id) || [],
+            email_notifications: emailsByOrder.get(order.id) || []
         }));
         renderFinanceSummary();
         renderOrdersOverview();
