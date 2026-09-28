@@ -85,13 +85,16 @@ Em **Email Templates**, crie um modelo. No campo de destinatário (**To Email**)
   <h1>Oi, {{client_name}}!</h1>
   <p>Sua comissão <strong>{{art_type}}</strong> recebeu uma atualização:</p>
   <p style="padding:14px;background:#f8eafa;border-radius:12px"><strong>{{status_label}}</strong></p>
+  <p>Código do pedido: <strong>{{tracking_code}}</strong></p>
   <p>Previsão de entrega: <strong>{{eta}}</strong></p>
-  <p><a href="{{tracking_url}}" style="display:inline-block;padding:12px 18px;background:#d987b5;color:white;text-decoration:none;border-radius:999px">Acompanhar pedido</a></p>
+  <p><a href="{{tracking_url}}" style="display:inline-block;padding:12px 18px;background:#d987b5;color:white;text-decoration:none;border-radius:999px">Acompanhar pedido pelo site</a></p>
   <p style="color:#88778b;font-size:13px">Você recebe este aviso porque autorizou atualizações por e-mail.</p>
 </div>
 ```
 
-O remetente deve ser o endereço conectado (`MikiMwk@hotmail.com`). Salve o modelo e copie os identificadores do serviço e do modelo. Em **Account → General**, copie a **Public Key**. Não compartilhe senha, chave privada ou token da Microsoft.
+O remetente deve ser o endereço conectado (`MikiMwk@hotmail.com`). Salve o modelo e copie os identificadores do serviço e do modelo. Em **Account → General**, copie a **Public Key**. Não compartilhe senha nem token da Microsoft.
+
+Como o envio parte da função de servidor do Supabase, em **Account → Security** habilite **Allow EmailJS API for non-browser applications** e mantenha **Use Private Key** ativada. O teste feito dentro do EmailJS roda no navegador; ele não confirma autorização para chamadas do Supabase.
 
 ### 3. Configurar e publicar no Supabase
 
@@ -102,17 +105,18 @@ Em **Edge Functions → Secrets**, cadastre estes nomes com os valores mostrados
 | Nome do segredo | Valor |
 | --- | --- |
 | `EMAILJS_PUBLIC_KEY` | Public Key da sua conta EmailJS |
+| `EMAILJS_ACCESS_TOKEN` | Private Key da conta EmailJS, usada apenas pela função no servidor |
 | `EMAILJS_SERVICE_ID` | ID do serviço conectado ao Hotmail |
 | `EMAILJS_TEMPLATE_ID` | ID do modelo criado acima |
 | `SITE_URL` | URL HTTPS do site publicado, sem barra final |
 
-Não coloque esses valores no HTML, no `backend-config.js` nem em repositórios públicos. O código usa a sessão da artista para consultar o pedido e só tenta enviar quando o cliente autorizou avisos.
+Não coloque esses valores no HTML, no `backend-config.js` nem em repositórios públicos. A Private Key deve ficar somente como segredo da Edge Function do Supabase; nunca a envie pelo chat. O código usa a sessão da artista para consultar o pedido e só tenta enviar quando o cliente autorizou avisos.
 
 Na criação do pedido, informe o e-mail apenas se a pessoa autorizar receber atualizações. Para pedidos antigos, abra a ficha, preencha **Avisos por e-mail ao cliente**, marque a autorização e salve. Cada mudança de etapa dispara um aviso com a etapa e o link público de acompanhamento; a ficha também oferece **Reenviar e-mail de status** para uma tentativa manual. Se o envio falhar, o painel mostra o motivo provável e mantém a etapa salva.
 
 Na criação do pedido, informe o e-mail apenas se a pessoa autorizar receber atualizações. Para pedidos antigos, abra a ficha, preencha **Avisos por e-mail ao cliente**, marque a autorização e salve. Cada mudança de etapa dispara um aviso; a ficha também oferece **Reenviar e-mail de status**. Se falhar, o painel mostra o motivo provável e mantém a etapa salva.
 
-Depois de implantar a função e cadastrar os quatro segredos, publique a versão atualizada do site na Vercel. Faça um teste com um pedido de teste e um e-mail da equipe; confira também spam/lixo eletrônico. Se não chegar, consulte **Edge Functions → notify-order-status → Logs** e tente o reenvio. Uma etapa pode aparecer atualizada mesmo quando o serviço de e-mail recusou o envio. Para grande volume, troque o serviço pessoal por um provedor transacional; EmailJS indica integrações pessoais para desenvolvimento ou volume muito baixo ([orientação do EmailJS](https://www.emailjs.com/docs/user-guide/connecting-email-services/)).
+Depois de implantar a função e cadastrar os cinco segredos, publique a versão atualizada do site na Vercel. Faça um teste com um pedido de teste e um e-mail da equipe; confira também spam/lixo eletrônico. Se não chegar, consulte **Edge Functions → notify-order-status → Invocations** para o código HTTP e os detalhes da resposta, e tente o reenvio. Uma etapa pode aparecer atualizada mesmo quando o serviço de e-mail recusou o envio. Para grande volume, troque o serviço pessoal por um provedor transacional; EmailJS indica integrações pessoais para desenvolvimento ou volume muito baixo ([orientação do EmailJS](https://www.emailjs.com/docs/user-guide/connecting-email-services/)).
 
 ## Pagamentos e cópias de segurança
 

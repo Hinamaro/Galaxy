@@ -28,6 +28,7 @@ Deno.serve(async request => {
   try { publishableKey = publishableKeys ? JSON.parse(publishableKeys).default || "" : ""; } catch { publishableKey = ""; }
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || publishableKey;
   const emailJsPublicKey = Deno.env.get("EMAILJS_PUBLIC_KEY");
+  const emailJsAccessToken = Deno.env.get("EMAILJS_ACCESS_TOKEN");
   const emailJsServiceId = Deno.env.get("EMAILJS_SERVICE_ID");
   const emailJsTemplateId = Deno.env.get("EMAILJS_TEMPLATE_ID");
   const siteUrlValue = Deno.env.get("SITE_URL") || "";
@@ -53,6 +54,7 @@ Deno.serve(async request => {
   }
   const missingSettings = [
     !emailJsPublicKey && "EMAILJS_PUBLIC_KEY",
+    !emailJsAccessToken && "EMAILJS_ACCESS_TOKEN",
     !emailJsServiceId && "EMAILJS_SERVICE_ID",
     !emailJsTemplateId && "EMAILJS_TEMPLATE_ID",
     !siteUrlValue && "SITE_URL",
@@ -73,11 +75,13 @@ Deno.serve(async request => {
   const safeLabel = escapeHtml(label);
   const safeEta = escapeHtml(eta);
   const safeUrl = escapeHtml(trackingUrl);
+  const safeTrackingCode = escapeHtml(order.tracking_code);
   const response = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       user_id: emailJsPublicKey,
+      accessToken: emailJsAccessToken,
       service_id: emailJsServiceId,
       template_id: emailJsTemplateId,
       template_params: {
@@ -86,6 +90,7 @@ Deno.serve(async request => {
         art_type: artType,
         status_label: safeLabel,
         eta: safeEta,
+        tracking_code: safeTrackingCode,
         tracking_url: safeUrl,
         subject: `Atualização da sua comissão: ${label}`,
       },
