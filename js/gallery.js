@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         share.setAttribute("aria-label", `Compartilhar a obra ${title}`);
         share.addEventListener("click", async event => {
             event.stopPropagation();
-            const url = new URL("gallery.html", window.location.href);
+            const url = new URL("/api/share", window.location.href);
             url.searchParams.set("obra", title);
             const shareData = { title: `${title} | Zoolixianas`, text: "Veja esta arte das Zoolixianas!", url: url.href };
             try {

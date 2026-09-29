@@ -86,10 +86,10 @@ a {
 
     --text: #390c47;
     --text-soft: #570c68;
-    --muted: #8d7b91;
+    --muted: #6c5c73;
 
     --accent: #e89bbd;
-    --accent-dark: #b95f87;
+    --accent-dark: #9d456f;
     --accent-soft: #f5cddd;
 
     --accent-purple: #b8a2d8;
@@ -247,6 +247,10 @@ body::before {
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
     border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto !important; }
 }
 
 

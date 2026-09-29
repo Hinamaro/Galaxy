@@ -13,6 +13,10 @@ Primeira versão do portfólio de comissões em português.
 - `js/` — funcionalidades
 - `data/` — dados editáveis
 - `assets/` — logo, banners e artes
+- `assets/branding/share-card.jpg` — cartão de prévia para links e download para redes sociais
+- `api/share.js` — prévia com o título da obra ao compartilhar links individuais (função Vercel)
+
+O endpoint `api/share.js` precisa ser publicado pelo Vercel junto com o restante do projeto para que os links individuais da galeria mostrem o título da obra nos aplicativos de mensagem.
 
 ## Próximos passos
 

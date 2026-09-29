@@ -72,8 +72,7 @@
     background:
         var(--accent);
 
-    color:
-        white;
+    color: var(--text);
 
     box-shadow:
         0 8px 22px
@@ -1111,4 +1110,11 @@
         flex-direction: column;
         gap: 8px;
     }
+}
+.home-share-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.home-share-actions .button { min-height: 44px; }
+.home-share-feedback { flex-basis: 100%; margin: 0; color: var(--text); font-size: .82rem; }
+.contact-banner .home-share-actions { justify-content: flex-end; }
+@media (max-width: 560px) {
+    .contact-banner .home-share-actions, .home-share-actions { justify-content: center; }
 }
