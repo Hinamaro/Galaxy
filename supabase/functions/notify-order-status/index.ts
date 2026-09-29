@@ -74,11 +74,22 @@ Deno.serve(async request => {
   const trackingUrl = `${siteUrl.origin}/status.html?codigo=${encodeURIComponent(order.tracking_code)}`;
   const eta = order.estimated_delivery
     ? new Date(`${order.estimated_delivery}T12:00:00Z`).toLocaleDateString("pt-BR", { timeZone: "UTC" })
-    : "";
+    : "Ainda sem previsão definida.";
   const perStatusMessages = order.artist_email_messages && typeof order.artist_email_messages === "object"
     ? order.artist_email_messages as Record<string, unknown> : {};
-  const artistMessage = String(perStatusMessages[order.status] ?? order.artist_email_message ?? "").trim().slice(0, 500);
+  const artistMessage = String(perStatusMessages[order.status] ?? order.artist_email_message ?? "").trim().slice(0, 500)
+    || "Nenhum recado adicional nesta atualização.";
   const statusColor = statusColors[order.status] || "#a174bb";
+  const subject = order.status === "approval"
+    ? "✦ Seu esboço está pronto para aprovação"
+    : order.status === "delivered"
+      ? "✦ Sua comissão foi finalizada"
+      : `✦ Sua comissão foi atualizada: ${label}`;
+  const preheader = order.status === "approval"
+    ? "A artista compartilhou novidades. Abra para conferir pelo acompanhamento do pedido."
+    : order.status === "delivered"
+      ? "Sua arte está pronta. Acesse o acompanhamento para ver os detalhes."
+      : "A artista atualizou seu pedido. Veja a nova etapa e acompanhe pelo site.";
   const response = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -89,6 +100,7 @@ Deno.serve(async request => {
       template_id: emailJsTemplateId,
       template_params: {
         to_email: order.client_email,
+        from_name: "Zoolixianas · Comissões",
         client_name: order.client_name,
         art_type: order.art_type,
         status_label: label,
@@ -99,7 +111,8 @@ Deno.serve(async request => {
         has_artist_message: Boolean(artistMessage),
         artist_message: artistMessage,
         status_color: statusColor,
-        subject: `Atualização da sua comissão: ${label}`,
+        subject,
+        preheader,
       },
     }),
   });
