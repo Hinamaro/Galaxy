@@ -18,13 +18,14 @@
     </script>
     <title>Painel das artistas | Zoolixianas</title>
     <link rel="icon" href="assets/branding/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=20260928-access-share">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/mobile.css">
     <link rel="stylesheet" href="css/painel.css?v=20260928-email-center">
 </head>
 <body>
+    <a class="skip-link" href="#main-content">Pular para o conteúdo</a>
 <header class="site-header" id="site-header">
     <div class="header-inner">
         <a href="index.html" class="brand" aria-label="Voltar para a página inicial"><span class="brand-mark">✦</span><span class="brand-text"><strong>Zoolixianas</strong><small>Painel das artistas</small></span></a>
@@ -32,7 +33,7 @@
         <button class="menu-toggle" id="menu-toggle" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="main-nav">☰</button>
     </div>
 </header>
-<main class="admin-main">
+<main id="main-content" tabindex="-1" class="admin-main">
     <section class="admin-heading"><span class="eyebrow">✦ Área privada</span><h1>Painel das artistas</h1><p>Atualize a disponibilidade e acompanhe os pedidos em um só lugar.</p></section>
     <p class="admin-alert" id="backend-message" role="status">Conectando ao sistema…</p>
     <p class="admin-message" id="auth-message" role="status" hidden></p>
@@ -129,7 +130,7 @@
     </section>
 </main>
 <footer class="site-footer"><div class="footer-inner"><div class="footer-brand"><strong>Zoolixianas</strong><span>Painel privado das artistas</span><p>Gerencie a disponibilidade e a fila de comissões.</p></div><nav class="footer-links" aria-label="Links úteis"><a href="index.html">Início</a><a href="status.html">Status público</a><a href="commissions.html">Preços e detalhes</a></nav><div class="footer-cta"><span class="eyebrow">Precisa de ajuda?</span><p>Volte para a página pública do site.</p><a href="status.html" class="footer-button">Ver status público <span aria-hidden="true">↗</span></a></div></div></footer>
-<script src="js/navigation.js"></script>
+<script src="js/navigation.js?v=20260928-access-share"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/backend-config.js"></script>
 <script src="js/admin-panel.js?v=20260928-email-center"></script>

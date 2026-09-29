@@ -179,6 +179,7 @@ document.addEventListener("DOMContentLoaded", () => {
             ) {
 
                 link.classList.add("active");
+                link.setAttribute("aria-current", "page");
 
             }
 

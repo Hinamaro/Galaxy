@@ -3,6 +3,42 @@ document.addEventListener("DOMContentLoaded", async () => {
     const grid = document.querySelector(".gallery-grid");
     if (!grid) return;
     let activeCategory = "all";
+    const shareFeedback = document.querySelector("#share-feedback");
+
+    function addShareButton(article) {
+        const overlay = article.querySelector(".gallery-overlay");
+        if (!overlay || overlay.querySelector(".gallery-share-button")) return;
+        const title = article.dataset.title || article.querySelector("h3")?.textContent.trim() || "Arte Zoolixianas";
+        const share = document.createElement("button");
+        share.type = "button";
+        share.className = "gallery-share-button";
+        share.textContent = "↗ Compartilhar";
+        share.setAttribute("aria-label", `Compartilhar a obra ${title}`);
+        share.addEventListener("click", async event => {
+            event.stopPropagation();
+            const url = new URL("gallery.html", window.location.href);
+            url.searchParams.set("obra", title);
+            const shareData = { title: `${title} | Zoolixianas`, text: "Veja esta arte das Zoolixianas!", url: url.href };
+            try {
+                if (navigator.share) await navigator.share(shareData);
+                else {
+                    await navigator.clipboard.writeText(url.href);
+                    if (shareFeedback) shareFeedback.textContent = "Link da obra copiado. Agora é só compartilhar onde quiser.";
+                }
+            } catch (error) {
+                if (error?.name === "AbortError") return;
+                try {
+                    await navigator.clipboard.writeText(url.href);
+                    if (shareFeedback) shareFeedback.textContent = "Link da obra copiado. Agora é só compartilhar onde quiser.";
+                } catch {
+                    if (shareFeedback) shareFeedback.textContent = `Copie o link para compartilhar: ${url.href}`;
+                }
+            }
+        });
+        overlay.append(share);
+    }
+
+    grid.querySelectorAll(".gallery-item").forEach(addShareButton);
 
     function applyFilter() {
         const items = [...grid.querySelectorAll(".gallery-item")];
@@ -62,7 +98,19 @@ document.addEventListener("DOMContentLoaded", async () => {
             overlay.append(tag, title, artist);
             article.append(button, overlay);
             grid.append(article);
+            addShareButton(article);
         });
     }
     applyFilter();
+
+    const sharedArtwork = new URLSearchParams(window.location.search).get("obra");
+    if (sharedArtwork) {
+        const matchingItem = [...grid.querySelectorAll(".gallery-item")].find(item => item.dataset.title === sharedArtwork);
+        const imageButton = matchingItem?.querySelector("[data-lightbox-trigger]");
+        if (imageButton) {
+            const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            matchingItem.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "center" });
+            window.setTimeout(() => imageButton.click(), 250);
+        }
+    }
 });

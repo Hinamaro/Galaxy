@@ -297,6 +297,28 @@
     opacity: 1;
     transform: translateY(0);
 }
+.gallery-item:focus-within .gallery-overlay { opacity: 1; transform: translateY(0); }
+.gallery-share-button {
+    position: relative;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 44px;
+    margin-top: 11px;
+    padding: 7px 13px;
+    border: 1px solid rgba(255,255,255,.72);
+    border-radius: 999px;
+    background: rgba(255,255,255,.94);
+    color: #563065;
+    font: inherit;
+    font-size: .72rem;
+    font-weight: 800;
+    pointer-events: auto;
+    cursor: pointer;
+}
+.gallery-share-button:hover { background: #fcecf5; }
+.gallery-share-button:focus-visible { outline-color: white; }
 
 .gallery-overlay .tag {
     display: inline-flex;

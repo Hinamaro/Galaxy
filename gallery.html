@@ -11,23 +11,36 @@
     >
 
     <title>Galeria | Zoolixianas</title>
+    <link rel="canonical" href="https://zoolixianas.vercel.app/gallery.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Zoolixianas">
+    <meta property="og:title" content="Galeria | Zoolixianas">
+    <meta property="og:description" content="Galeria de ilustrações digitais e trabalhos das Zoolixianas.">
+    <meta property="og:url" content="https://zoolixianas.vercel.app/gallery.html">
+    <meta property="og:image" content="https://zoolixianas.vercel.app/assets/about/a.webp">
+    <meta property="og:image:alt" content="Arte colorida das artistas Zoolixianas">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Galeria | Zoolixianas">
+    <meta name="twitter:description" content="Galeria de ilustrações digitais e trabalhos das Zoolixianas.">
+    <meta name="twitter:image" content="https://zoolixianas.vercel.app/assets/about/a.webp">
 
     <meta
         name="description"
         content="Galeria de ilustrações digitais e trabalhos das Zoolixianas."
     >
 
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=20260928-access-share">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/animations.css">
     <link rel="stylesheet" href="css/decorations.css">
-    <link rel="stylesheet" href="css/gallery.css">
+    <link rel="stylesheet" href="css/gallery.css?v=20260928-access-share">
     <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/lightbox.css">
     <link rel="stylesheet" href="css/mobile.css">
 </head>
 
 <body>
+    <a class="skip-link" href="#main-content">Pular para o conteúdo</a>
 
 <header class="site-header" id="site-header">
 
@@ -73,7 +86,7 @@
 </header>
 
 
-<main>
+<main id="main-content" tabindex="-1">
 
     <!-- CABEÇALHO -->
 
@@ -99,44 +112,56 @@
 
     <section class="gallery-section">
 
-        <div class="gallery-filters">
+        <div class="gallery-filters" role="group" aria-label="Filtrar obras por categoria">
 
             <button
+                type="button"
                 class="gallery-filter active"
                 data-filter="all"
+                aria-pressed="true"
             >
                 Todas
             </button>
 
             <button
+                type="button"
                 class="gallery-filter"
                 data-filter="character"
+                aria-pressed="false"
             >
                 Personagens
             </button>
 
             <button
+                type="button"
                 class="gallery-filter"
                 data-filter="fanart"
+                aria-pressed="false"
             >
                 Fanarts
             </button>
 
             <button
+                type="button"
                 class="gallery-filter"
                 data-filter="oc"
+                aria-pressed="false"
             >
                 OCs
             </button>
 
             <button
+                type="button"
                 class="gallery-filter"
                 data-filter="illustration"
+                aria-pressed="false"
             >
                 Ilustrações
             </button>
 
         </div>
+
+        <p id="share-feedback" class="sr-only" role="status" aria-live="polite"></p>
 
 
         <div class="gallery-grid">
@@ -533,11 +558,11 @@
 
 
 <script src="js/app.js"></script>
-<script src="js/navigation.js"></script>
+<script src="js/navigation.js?v=20260928-access-share"></script>
 <script src="js/reveal.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/backend-config.js"></script>
-<script src="js/gallery.js"></script>
+<script src="js/gallery.js?v=20260928-access-share"></script>
 <script src="js/lightbox.js"></script>
 <script src="js/spotlight.js"></script>
 <script src="js/decorations.js"></script>
