@@ -126,7 +126,7 @@
         <div class="artists-intro">
             <span class="eyebrow">✦ Fale diretamente com quem cria</span>
             <h2>Escolha sua artista</h2>
-            <p>Para encomendar sua comissão, envie uma mensagem direta pelo Instagram da artista escolhida.</p>
+            <p>Escolha uma artista para conversar pelo Instagram ou envie os detalhes pelo formulário seguro abaixo.</p>
         </div>
 
         <div class="artist-cards">
@@ -150,6 +150,24 @@
                 </div>
             </article>
         </div>
+
+        <section class="commission-intake-card" aria-labelledby="commission-intake-title">
+            <span class="eyebrow">✦ Também pode pedir por aqui</span>
+            <h2 id="commission-intake-title">Conte sua ideia para a gente</h2>
+            <p>O envio abre um pedido para análise da artista. A comissão só fica confirmada depois de combinarmos orçamento e detalhes.</p>
+            <form id="commission-intake-form" class="commission-intake-form">
+                <label for="intake-name">Seu nome</label><input id="intake-name" name="name" autocomplete="name" maxlength="120" required>
+                <label for="intake-contact">Como podemos falar com você?</label><input id="intake-contact" name="contact" maxlength="180" placeholder="@ do Instagram ou outro contato" required>
+                <label for="intake-email">E-mail <span>(opcional)</span></label><input id="intake-email" name="email" type="email" autocomplete="email" maxlength="254" placeholder="voce@exemplo.com">
+                <label for="intake-artist">Artista</label><select id="intake-artist" name="artist" required><option value="">Escolha uma artista</option><option value="Ynnley">Ynnley</option><option value="Bonny">Bonny</option></select>
+                <label for="intake-type">Tipo de arte</label><input id="intake-type" name="type" maxlength="100" placeholder="Ex.: busto, meio corpo, corpo todo" required>
+                <label for="intake-summary">O que você imaginou?</label><textarea id="intake-summary" name="summary" minlength="10" maxlength="1200" rows="5" placeholder="Descreva personagem, pose, estilo ou outros detalhes importantes" required></textarea>
+                <label for="intake-reference">Link de referência <span>(opcional)</span></label><input id="intake-reference" name="reference" type="url" maxlength="500" placeholder="Link de imagem ou pasta compartilhada">
+                <label class="intake-consent"><input id="intake-email-consent" type="checkbox"><span>Autorizo receber atualizações deste pedido por e-mail.</span></label>
+                <button class="button button-primary" type="submit">Enviar pedido para análise <span aria-hidden="true">✦</span></button>
+            </form>
+            <p id="commission-intake-message" class="commission-intake-message" role="status" aria-live="polite" hidden></p>
+        </section>
     </section>
 </main>
 
@@ -223,6 +241,9 @@
 
 <script src="js/app.js"></script>
 <script src="js/navigation.js?v=20260928-access-share"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/backend-config.js"></script>
+<script src="js/commission-intake.js?v=20260929-deliveries"></script>
 <script src="js/reveal.js"></script>
 <script src="js/gallery.js"></script>
 <script src="js/lightbox.js"></script>

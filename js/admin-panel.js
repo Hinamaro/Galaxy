@@ -548,6 +548,171 @@ document.addEventListener("DOMContentLoaded", async () => {
         return `zoolixianas-email-resend:${order.id}:${order.status}`;
     }
 
+    function createOrderDeliveries(order) {
+        const section = document.createElement("section");
+        section.className = "order-deliveries";
+        const title = document.createElement("h5");
+        title.textContent = "Esboços e arquivos do cliente";
+        const list = document.createElement("div");
+        list.className = "delivery-file-list";
+        const kindNames = { sketch: "Esboço", final: "Arte final", other: "Outro arquivo" };
+        const files = order.deliveries || [];
+        if (!files.length) {
+            const empty = document.createElement("p");
+            empty.className = "delivery-empty";
+            empty.textContent = "Ainda não há arquivos neste pedido.";
+            list.append(empty);
+        }
+        files.forEach(file => {
+            const item = document.createElement("div");
+            item.className = "delivery-file-item";
+            const name = document.createElement("strong");
+            name.textContent = file.original_name;
+            const description = document.createElement("span");
+            description.textContent = `${kindNames[file.file_kind] || "Arquivo"} · ${(file.file_size / 1048576).toFixed(1)} MB${file.client_visible ? " · disponível para cliente" : " · privado"}`;
+            item.append(name, description);
+            if (file.note) {
+                const note = document.createElement("small");
+                note.textContent = file.note;
+                item.append(note);
+            }
+            const controls = document.createElement("div");
+            controls.className = "delivery-file-actions";
+            const visibleLabel = document.createElement("label");
+            visibleLabel.className = "delivery-visible-control";
+            const visible = document.createElement("input");
+            visible.type = "checkbox";
+            visible.checked = file.client_visible;
+            visibleLabel.append(visible, document.createTextNode(" Cliente pode abrir"));
+            visible.addEventListener("change", async () => {
+                visible.disabled = true;
+                const { error } = await client.from("commission_deliveries").update({ client_visible: visible.checked }).eq("id", file.id);
+                visible.disabled = false;
+                if (error) { visible.checked = !visible.checked; setMessage("Não foi possível alterar a visibilidade. Confira a configuração de arquivos privados.", true); }
+                else { setMessage(visible.checked ? "Arquivo liberado para o cliente." : "Arquivo ocultado do cliente."); await loadOrders(); }
+            });
+            const remove = document.createElement("button");
+            remove.type = "button";
+            remove.className = "copy-tracking-code";
+            remove.textContent = "Remover arquivo";
+            remove.addEventListener("click", async () => {
+                if (!window.confirm(`Remover o arquivo “${file.original_name}” deste pedido?`)) return;
+                remove.disabled = true;
+                const { error: storageError } = await client.storage.from("commission-deliveries").remove([file.file_path]);
+                if (storageError) { remove.disabled = false; setMessage("Não foi possível remover o arquivo privado.", true); return; }
+                const { error } = await client.from("commission_deliveries").delete().eq("id", file.id);
+                if (error) { remove.disabled = false; setMessage("Arquivo removido do armazenamento, mas não foi possível atualizar a lista.", true); return; }
+                setMessage("Arquivo removido do pedido.");
+                await loadOrders();
+            });
+            controls.append(visibleLabel, remove);
+            item.append(controls);
+            list.append(item);
+        });
+        const form = document.createElement("form");
+        form.className = "delivery-upload-form";
+        const fileLabel = document.createElement("label");
+        fileLabel.textContent = "Arquivo";
+        const input = document.createElement("input");
+        input.type = "file";
+        input.required = true;
+        input.accept = ".png,.jpg,.jpeg,.webp,.gif,.pdf,.zip,.psd,.clip,.kra,.procreate,.mp4,.mov,.txt";
+        input.setAttribute("aria-label", `Escolher arquivo para o pedido de ${order.client_name}`);
+        const kindLabel = document.createElement("label");
+        kindLabel.textContent = "Categoria";
+        const kind = document.createElement("select");
+        kind.innerHTML = '<option value="sketch">Esboço</option><option value="final">Arte final</option><option value="other">Outro</option>';
+        const noteLabel = document.createElement("label");
+        noteLabel.textContent = "Recado para o cliente (opcional)";
+        const note = document.createElement("input");
+        note.type = "text";
+        note.maxLength = 500;
+        note.placeholder = "Ex.: veja se a pose está como imaginou";
+        const visLabel = document.createElement("label");
+        visLabel.className = "delivery-visible-control";
+        const vis = document.createElement("input");
+        vis.type = "checkbox";
+        vis.checked = true;
+        visLabel.append(vis, document.createTextNode("Disponibilizar ao cliente agora"));
+        const help = document.createElement("small");
+        help.className = "delivery-upload-help";
+        help.textContent = "Até 100 MB por arquivo quando o limite do plano Supabase permitir. Arquivos grandes enviam com progresso e podem continuar após falha de conexão.";
+        const progress = document.createElement("progress");
+        progress.max = 100;
+        progress.value = 0;
+        progress.hidden = true;
+        const submit = document.createElement("button");
+        submit.type = "submit";
+        submit.className = "button button-secondary";
+        submit.textContent = "Enviar arquivo privado";
+        form.append(fileLabel, input, kindLabel, kind, noteLabel, note, visLabel, help, progress, submit);
+        form.addEventListener("submit", async event => {
+            event.preventDefault();
+            const file = input.files?.[0];
+            if (!file) return;
+            const maxBytes = 100 * 1024 * 1024;
+            if (file.size > maxBytes) { setMessage("Este arquivo passa do limite de 100 MB.", true); return; }
+            if (!window.tus?.Upload) { setMessage("Não foi possível preparar o envio de arquivo. Atualize a página e tente de novo.", true); return; }
+            submit.disabled = true;
+            input.disabled = true;
+            progress.hidden = false;
+            progress.value = 0;
+            setMessage("Preparando envio seguro do arquivo…");
+            const { data: sessionData, error: sessionError } = await client.auth.getSession();
+            const session = sessionData?.session;
+            if (sessionError || !session?.access_token) {
+                submit.disabled = false; input.disabled = false; progress.hidden = true;
+                setMessage("Sua sessão expirou. Entre novamente no painel para enviar arquivos.", true);
+                return;
+            }
+            const cleanName = file.name.normalize("NFKD").replace(/[^\w.-]+/g, "_").slice(-180) || "arquivo";
+            const fingerprintText = `${order.id}:${file.name}:${file.size}:${file.lastModified}`;
+            let pathHash = 2166136261;
+            for (const character of fingerprintText) pathHash = Math.imul(pathHash ^ character.charCodeAt(0), 16777619);
+            const path = `${order.id}/${(pathHash >>> 0).toString(16)}-${cleanName}`;
+            const projectId = new URL(config.supabaseUrl).hostname.split(".")[0];
+            const upload = new window.tus.Upload(file, {
+                endpoint: `https://${projectId}.storage.supabase.co/storage/v1/upload/resumable`,
+                chunkSize: 6 * 1024 * 1024,
+                retryDelays: [0, 3000, 5000, 10000, 20000],
+                headers: { authorization: `Bearer ${session.access_token}`, apikey: config.publishableKey, "x-upsert": "true" },
+                uploadDataDuringCreation: true,
+                removeFingerprintOnSuccess: true,
+                metadata: { bucketName: "commission-deliveries", objectName: path, contentType: file.type || "application/octet-stream", cacheControl: "3600" },
+                onError: async error => {
+                    submit.disabled = false; input.disabled = false; progress.hidden = true;
+                    if (error?.originalResponse?.getStatus?.() === 413) setMessage("O Supabase recusou: o limite global do projeto é menor que o arquivo. No plano gratuito, o teto é 50 MB.", true);
+                    else setMessage("O envio não terminou. Confira o limite do Storage no Supabase e tente novamente.", true);
+                },
+                onProgress: (uploaded, total) => {
+                    const percent = Math.round(uploaded / total * 100);
+                    progress.value = percent;
+                    setMessage(`Enviando arquivo… ${percent}%`);
+                },
+                onSuccess: async () => {
+                    const { data: userData } = await client.auth.getUser();
+                    const { error } = await client.from("commission_deliveries").upsert({
+                        order_id: order.id, file_path: path, original_name: file.name.slice(0, 255),
+                        file_size: file.size, mime_type: file.type || "application/octet-stream",
+                        file_kind: kind.value, note: note.value.trim(), client_visible: vis.checked,
+                        created_by: userData.user.id
+                    }, { onConflict: "file_path" });
+                    if (error) {
+                        await client.storage.from("commission-deliveries").remove([path]);
+                        setMessage("O arquivo chegou, mas não foi possível vinculá-lo ao pedido. Tente novamente.", true);
+                    } else setMessage("Arquivo enviado. O cliente já pode abri-lo com o código do pedido.");
+                    await loadOrders();
+                }
+            });
+            upload.findPreviousUploads().then(previousUploads => {
+                if (previousUploads.length) upload.resumeFromPreviousUpload(previousUploads[0]);
+                upload.start();
+            }).catch(() => upload.start());
+        });
+        section.append(title, list, form);
+        return section;
+    }
+
     function renderOrders() {
         const container = document.querySelector("#orders-list");
         container.replaceChildren();
@@ -765,7 +930,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             const emailPrefs = createOrderEmailPrefs(order);
             const emailMessage = createOrderEmailMessage(order);
             const finance = createOrderFinance(order);
-            details.append(heading, badge, contact, emailInfo, emailPrefs, emailMessage, createEmailHistory(order), type, artist, summary, date, lastUpdated, tracking, finance, historyDetails, requestsDetails);
+            details.append(heading, badge, contact, emailInfo, emailPrefs, emailMessage, createEmailHistory(order), type, artist, summary, date, lastUpdated, tracking, finance, createOrderDeliveries(order), historyDetails, requestsDetails);
 
             const select = document.createElement("select");
             select.dataset.status = order.status;
@@ -839,6 +1004,22 @@ document.addEventListener("DOMContentLoaded", async () => {
             remove.addEventListener("click", async () => {
                 if (!window.confirm(`Remover permanentemente o pedido de ${order.client_name}?`)) return;
                 remove.disabled = true;
+                const { data: attachedFiles, error: filesError } = await client.from("commission_deliveries")
+                    .select("file_path").eq("order_id", order.id);
+                if (filesError) {
+                    remove.disabled = false;
+                    setMessage("Não foi possível conferir os arquivos privados do pedido. O pedido foi mantido.", true);
+                    return;
+                }
+                if (attachedFiles?.length) {
+                    const { error: storageError } = await client.storage.from("commission-deliveries")
+                        .remove(attachedFiles.map(file => file.file_path));
+                    if (storageError) {
+                        remove.disabled = false;
+                        setMessage("Não foi possível remover os arquivos privados. O pedido foi mantido.", true);
+                        return;
+                    }
+                }
                 const { error: deleteError } = await client.from("commission_orders").delete().eq("id", order.id);
                 if (deleteError) {
                     remove.disabled = false;
@@ -878,12 +1059,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         let requestsByOrder = new Map();
         let paymentsByOrder = new Map();
         let emailsByOrder = new Map();
+        let deliveriesByOrder = new Map();
         if (orderIds.length) {
-            const [historyResult, requestsResult, paymentsResult, emailResult] = await Promise.all([
+            const [historyResult, requestsResult, paymentsResult, emailResult, deliveriesResult] = await Promise.all([
                 client.from("commission_order_history").select("order_id, status, changed_at").in("order_id", orderIds).order("changed_at", { ascending: true }),
                 client.from("commission_client_requests").select("id, order_id, request_type, message, state, created_at, handled_at").in("order_id", orderIds).order("created_at", { ascending: false }),
                 client.from("commission_payments").select("id, order_id, amount, paid_at, payment_method, note").in("order_id", orderIds).order("paid_at", { ascending: false }),
-                client.from("commission_email_notifications").select("id, order_id, status, sent, detail, created_at").in("order_id", orderIds).order("created_at", { ascending: false })
+                client.from("commission_email_notifications").select("id, order_id, status, sent, detail, created_at").in("order_id", orderIds).order("created_at", { ascending: false }),
+                client.from("commission_deliveries").select("id, order_id, file_path, original_name, file_size, mime_type, file_kind, note, client_visible, created_at").in("order_id", orderIds).order("created_at", { ascending: false })
             ]);
             if (historyResult.error || requestsResult.error || paymentsResult.error || emailResult.error) {
                 setMessage(emailResult.error
@@ -906,13 +1089,16 @@ document.addEventListener("DOMContentLoaded", async () => {
                 paymentsByOrder.get(item.order_id).push(item);
             });
             (emailResult.data || []).forEach(item => { if (!emailsByOrder.has(item.order_id)) emailsByOrder.set(item.order_id, []); emailsByOrder.get(item.order_id).push(item); });
+            if (deliveriesResult.error) setMessage("Aplique supabase/commission-delivery-and-intake.sql para ativar os envios privados e os pedidos pelo site.", true);
+            (deliveriesResult.data || []).forEach(item => { if (!deliveriesByOrder.has(item.order_id)) deliveriesByOrder.set(item.order_id, []); deliveriesByOrder.get(item.order_id).push(item); });
         } else cachedPayments = [];
         cachedOrders = (data || []).map(order => ({
             ...order,
             history: historyByOrder.get(order.id) || [],
             client_requests: requestsByOrder.get(order.id) || [],
             payments: paymentsByOrder.get(order.id) || [],
-            email_notifications: emailsByOrder.get(order.id) || []
+            email_notifications: emailsByOrder.get(order.id) || [],
+            deliveries: deliveriesByOrder.get(order.id) || []
         }));
         renderFinanceSummary();
         renderOrdersOverview();

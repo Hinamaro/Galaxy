@@ -178,6 +178,57 @@ document.addEventListener("DOMContentLoaded", async () => {
             historySection.append(historyTitle, historyList);
             trackingResult.append(historySection);
         }
+        const { data: deliveryFiles } = await client.rpc("get_public_order_deliveries", { lookup_code: code });
+        if (Array.isArray(deliveryFiles) && deliveryFiles.length) {
+            const deliverySection = document.createElement("section");
+            deliverySection.className = "tracking-deliveries";
+            const deliveryTitle = document.createElement("h4");
+            deliveryTitle.textContent = "Arquivos compartilhados pela artista";
+            const deliveryList = document.createElement("div");
+            deliveryList.className = "tracking-delivery-list";
+            deliverySection.append(deliveryTitle, deliveryList);
+            for (const file of deliveryFiles) {
+                const item = document.createElement("article");
+                item.className = "tracking-delivery-item";
+                const name = document.createElement("strong");
+                name.textContent = file.original_name;
+                const kindNames = { sketch: "Esboço", final: "Arte final", other: "Arquivo" };
+                const info = document.createElement("span");
+                info.textContent = `${kindNames[file.file_kind] || "Arquivo"} · ${(Number(file.file_size) / 1048576).toFixed(1)} MB`;
+                const open = document.createElement("button");
+                open.type = "button";
+                open.className = "button button-secondary";
+                open.textContent = "Preparando arquivo…";
+                open.disabled = true;
+                item.append(name, info);
+                if (file.note) {
+                    const note = document.createElement("p");
+                    note.textContent = file.note;
+                    item.append(note);
+                }
+                deliveryList.append(item);
+                const { data: signedData, error: signedError } = await client.functions.invoke("get-order-delivery", {
+                    body: { lookupCode: code, fileId: file.id }
+                });
+                if (signedError || !signedData?.downloadUrl) {
+                    open.textContent = "Arquivo temporariamente indisponível";
+                    open.disabled = true;
+                } else {
+                    open.textContent = "Baixar arquivo";
+                    open.disabled = false;
+                    open.addEventListener("click", () => window.open(signedData.downloadUrl, "_blank", "noopener,noreferrer"));
+                }
+                if (!signedError && signedData?.previewUrl && file.mime_type?.startsWith("image/")) {
+                    const preview = document.createElement("img");
+                    preview.src = signedData.previewUrl;
+                    preview.alt = `Prévia: ${file.original_name}`;
+                    preview.loading = "lazy";
+                    item.append(preview);
+                }
+                item.append(open);
+            }
+            trackingResult.append(deliverySection);
+        }
         const contactLink = document.createElement("a");
         contactLink.className = "button button-secondary tracking-contact-link";
         contactLink.href = "contact.html";

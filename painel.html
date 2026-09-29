@@ -111,6 +111,7 @@
             <button class="button button-secondary export-orders-button" id="export-orders" type="button">Baixar backup da fila (.CSV)</button>
             <button class="button button-secondary export-orders-button" id="export-full-backup" type="button">Baixar backup dos dados (.JSON)</button>
             <p class="finance-note">Guarde o arquivo em local privado. Inclui contato, valores, histórico e referências da galeria; as imagens do Storage precisam de cópia separada. Para cópia diária do banco, consulte as opções do Supabase.</p>
+            <p class="delivery-setup-note"><strong>Arquivos para clientes:</strong> use o espaço abaixo de cada pedido para enviar esboço ou arte final. Os arquivos ficam privados; somente quem tem o código daquele pedido poderá abrir os que você marcar como disponíveis.</p>
             <div class="orders-list" id="orders-list" aria-live="polite"></div>
         </section>
         <section class="admin-card" aria-labelledby="gallery-upload-title">
@@ -132,7 +133,8 @@
 <footer class="site-footer"><div class="footer-inner"><div class="footer-brand"><strong>Zoolixianas</strong><span>Painel privado das artistas</span><p>Gerencie a disponibilidade e a fila de comissões.</p></div><nav class="footer-links" aria-label="Links úteis"><a href="index.html">Início</a><a href="status.html">Status público</a><a href="commissions.html">Preços e detalhes</a></nav><div class="footer-cta"><span class="eyebrow">Precisa de ajuda?</span><p>Volte para a página pública do site.</p><a href="status.html" class="footer-button">Ver status público <span aria-hidden="true">↗</span></a></div></div></footer>
 <script src="js/navigation.js?v=20260928-access-share"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/tus-js-client@4/dist/tus.min.js"></script>
 <script src="js/backend-config.js"></script>
-<script src="js/admin-panel.js?v=20260928-email-center"></script>
+<script src="js/admin-panel.js?v=20260929-deliveries"></script>
 </body>
 </html>

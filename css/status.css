@@ -106,6 +106,15 @@
 .tracking-step.is-current[data-status="finalizing"] { background: #e9e1f4; color: #604780; }
 .tracking-step.is-current[data-status="delivered"] { background: #e9f3ed; color: #47765e; }
 .tracking-privacy { max-width: 620px; padding: 10px 13px; border-radius: 12px; background: rgba(255,255,255,.55); }
+.tracking-deliveries { display: grid; gap: 12px; margin-top: 18px; padding: 16px; border: 1px solid #e7d7ef; border-radius: 15px; background: linear-gradient(140deg,#fff8fc,#f4eefb); }
+.tracking-deliveries h4 { margin: 0; color: #755385; font-size: .93rem; }
+.tracking-delivery-list { display: grid; gap: 10px; }
+.tracking-delivery-item { display: grid; justify-items: start; gap: 7px; padding: 13px; border: 1px solid rgba(220,199,229,.84); border-radius: 12px; background: rgba(255,255,255,.85); }
+.tracking-delivery-item strong { color: #58356d; overflow-wrap: anywhere; font-size: .85rem; }
+.tracking-delivery-item > span { color: var(--muted); font-size: .73rem; }
+.tracking-delivery-item p { margin: 0; color: #765285; font-size: .8rem; }
+.tracking-delivery-item img { display: block; max-width: min(100%, 480px); max-height: 420px; border: 1px solid #ead8ed; border-radius: 10px; object-fit: contain; background: #fff; }
+.tracking-delivery-item button { min-height: 38px; padding: 7px 13px; font-size: .76rem; }
 @media (max-width: 560px) {
     .tracking-result { padding: 18px 15px; }
     .tracking-result-heading { align-items: flex-start; flex-direction: column; }

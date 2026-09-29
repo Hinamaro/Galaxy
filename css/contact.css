@@ -915,3 +915,19 @@
 .artist-card .artist-photo img { mix-blend-mode: screen; opacity: .86; }
 
 .contact-hero h1 span { color: transparent; }
+.commission-intake-card { width: min(820px, calc(100% - 36px)); margin: clamp(42px,7vw,84px) auto 0; padding: clamp(22px,5vw,44px); border: 1px solid rgba(220,179,214,.78); border-radius: 26px; background: linear-gradient(145deg,rgba(255,250,253,.96),rgba(244,235,252,.94)); box-shadow: 0 22px 64px rgba(87,56,95,.11); }
+.commission-intake-card h2 { margin: 10px 0 7px; color: var(--text); font-size: clamp(1.5rem,4vw,2.15rem); letter-spacing: -.035em; }
+.commission-intake-card > p:not(.commission-intake-message) { max-width: 650px; color: var(--muted); line-height: 1.65; }
+.commission-intake-form { display: grid; grid-template-columns: 190px minmax(0,1fr); align-items: center; gap: 12px 18px; margin-top: 24px; }
+.commission-intake-form label { color: var(--text-soft); font-size: .86rem; font-weight: 750; }
+.commission-intake-form label span { font-size: .76rem; font-weight: 500; }
+.commission-intake-form input,.commission-intake-form select,.commission-intake-form textarea { width: 100%; min-height: 46px; padding: 11px 13px; border: 1px solid #e7c9df; border-radius: 12px; background: rgba(255,255,255,.9); color: var(--text); font: inherit; }
+.commission-intake-form textarea { resize: vertical; }
+.commission-intake-form :focus-visible { outline: 3px solid rgba(185,95,135,.24); border-color: var(--accent-dark); }
+.commission-intake-form .intake-consent { grid-column: 2; display: flex; align-items: flex-start; gap: 10px; font-size: .8rem; }
+.commission-intake-form .intake-consent input { width: 18px; min-height: 18px; height: 18px; margin-top: 2px; accent-color: #ad70b5; }
+.commission-intake-form button { grid-column: 2; justify-self: start; }
+.commission-intake-message { margin: 16px 0 0; padding: 13px 15px; border-radius: 13px; background: #f0eafa; color: #694d82; line-height: 1.55; }
+.commission-intake-message[data-state="error"] { background: #fff0f5; color: #934b6d; }
+.commission-intake-message a { display: inline-block; margin-top: 8px; color: #8f4772; font-weight: 800; }
+@media(max-width:650px) { .commission-intake-form { grid-template-columns: 1fr; gap: 8px; } .commission-intake-form label:not(.intake-consent) { margin-top: 8px; } .commission-intake-form .intake-consent,.commission-intake-form button { grid-column: 1; } .commission-intake-form button { width: 100%; justify-content: center; } }

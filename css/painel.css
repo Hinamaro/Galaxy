@@ -257,3 +257,23 @@
     .finance-summary-heading input { width: 100%; }
     .order-row { padding: 13px; }
 }
+.delivery-setup-note { margin: 22px 0 -5px; padding: 13px 16px; border: 1px solid #ead8ed; border-radius: 13px; background: linear-gradient(110deg,#fff7fb,#f4eef9); color: #765285; font-size: .82rem; line-height: 1.5; }
+.order-deliveries { display: grid; gap: 12px; margin: 16px 0; padding: 15px; border: 1px solid #ead8ed; border-radius: 15px; background: linear-gradient(140deg,rgba(255,249,253,.92),rgba(246,239,250,.85)); }
+.order-deliveries h5 { margin: 0; color: #765285; font-size: .85rem; }
+.delivery-file-list { display: grid; gap: 8px; }
+.delivery-empty { margin: 0; color: var(--muted); font-size: .78rem; }
+.delivery-file-item { display: grid; gap: 5px; padding: 11px 12px; border: 1px solid rgba(222,199,229,.8); border-radius: 12px; background: rgba(255,255,255,.72); }
+.delivery-file-item > strong { color: #58356d; overflow-wrap: anywhere; font-size: .82rem; }
+.delivery-file-item > span,.delivery-file-item > small { color: var(--muted); font-size: .72rem; }
+.delivery-file-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; margin-top: 3px; }
+.delivery-visible-control { display: inline-flex; align-items: center; gap: 6px; color: #765285; font-size: .73rem; font-weight: 700; }
+.delivery-visible-control input { width: 16px; height: 16px; accent-color: #ad70b5; }
+.delivery-upload-form { display: grid; grid-template-columns: 145px minmax(0,1fr); align-items: center; gap: 8px 12px; padding-top: 12px; border-top: 1px solid #ead8ed; }
+.delivery-upload-form > label:not(.delivery-visible-control) { color: var(--text-soft); font-size: .76rem; font-weight: 750; }
+.delivery-upload-form input:not([type=checkbox]),.delivery-upload-form select { width: 100%; min-height: 40px; padding: 8px 10px; border: 1px solid #e6c9df; border-radius: 10px; background: #fff; color: var(--text); font: inherit; font-size: .78rem; }
+.delivery-upload-form .delivery-visible-control,.delivery-upload-form .delivery-upload-help,.delivery-upload-form progress,.delivery-upload-form button { grid-column: 2; }
+.delivery-upload-help { color: var(--muted); font-size: .7rem; line-height: 1.45; }
+.delivery-upload-form progress { width: 100%; height: 9px; accent-color: #b66fa9; }
+.delivery-upload-form button { justify-self: start; min-height: 38px; font-size: .76rem; }
+.delivery-upload-form button:disabled { opacity: .6; }
+@media(max-width:650px) { .delivery-upload-form { grid-template-columns: 1fr; } .delivery-upload-form .delivery-visible-control,.delivery-upload-form .delivery-upload-help,.delivery-upload-form progress,.delivery-upload-form button { grid-column: 1; } .delivery-upload-form button { justify-self: stretch; } .delivery-file-actions { align-items: flex-start; flex-direction: column; } }

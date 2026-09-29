@@ -13,6 +13,18 @@ Antes de publicar a versão anterior, o projeto executou `supabase/public-tracki
 
 Para habilitar os recursos já preparados, abra **SQL Editor → New query** e execute, nesta ordem, `supabase/studio-workflow-upgrades.sql`, `supabase/business-tools.sql` e `supabase/email-notification-message.sql`. Faça isso uma vez, depois da migração de códigos/exclusão já executada. A primeira cria histórico, solicitações e galeria autorizada; a segunda cria acesso por artista, pagamentos e campos de comunicação; a terceira ativa mensagens privadas por etapa e o histórico de tentativas de e-mail, visível somente às artistas autorizadas. `order-tracking-details.sql` é uma versão anterior da previsão e não precisa ser executada separadamente.
 
+## Pedidos pelo site e entrega privada de arquivos
+
+Para ativar o formulário de encomenda e o envio de esboços/arte final, execute `supabase/commission-delivery-and-intake.sql` no SQL Editor depois das migrações acima. O pedido entra na fila privada com status “Pedido recebido”; o formulário entrega ao cliente um código individual de acompanhamento. Nome, contato, resumo e referências continuam escondidos da consulta pública.
+
+Depois, em **Edge Functions → Deploy a new function → Via Editor**, crie `get-order-delivery` e copie `supabase/functions/get-order-delivery/index.ts`. Desative **Verify JWT** para essa função, pois o endpoint confere o código do pedido e só emite um link temporário para arquivo marcado como disponível ao cliente. Não coloque a chave `service_role` no código do site; a função usa o segredo reservado do próprio Supabase. O arquivo `supabase/config.toml` registra essa configuração caso publique a função pela CLI.
+
+No painel, cada pedido terá um formulário privado de arquivos: escolha esboço, arte final ou outro; escreva um recado; e marque se o cliente pode abrir. Imagens aparecem com prévia na página Status; outros formatos ficam disponíveis para baixar. PDF, ZIP, PSD, CLIP, KRA, Procreate, imagens e vídeo são aceitos pela interface, até 100 MB. A artista pode esconder ou remover arquivos depois.
+
+**Limite do plano:** o projeto gratuito limita cada upload a 50 MB. O envio retomável e a interface aceitam até 100 MB, mas arquivos acima de 50 MB só funcionarão se o plano e o limite global do Storage permitirem. Quando isso estiver habilitado, abra **Storage → Settings**, aumente **Global file size limit** para pelo menos 100 MB e edite o bucket privado `commission-deliveries` para o mesmo limite. Não é necessário alterar o bucket público `commission-gallery`.
+
+O código do pedido é a credencial de acesso do cliente: compartilhe-o somente com a pessoa que encomendou. Links individuais de arquivo expiram depois de alguns minutos. Se o cliente abrir a página Status pelo código, arquivos liberados aparecem ali; o cliente não vê e-mail, contato, valor ou descrição privada do pedido.
+
 ## O que falta antes do primeiro acesso
 
 1. No Supabase, abra **Authentication → Users** e crie uma conta individual para cada artista. Não compartilhem a mesma conta.
