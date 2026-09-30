@@ -959,25 +959,36 @@ document.addEventListener("DOMContentLoaded", async () => {
                             sessionStorage.removeItem(cooldownKey);
                         }, cooldownUntil - Date.now());
                     }
-                    resendEmail.addEventListener("click", async () => {
+                    resendEmail.addEventListener("click", () => {
                         if (resendEmail.disabled) return;
                         const statusName = orderStatuses.find(([value]) => value === order.status)?.[1] || "atual";
                         if (!window.confirm(`Enviar agora o aviso da etapa “${statusName}” para ${order.client_email}?`)) return;
                         resendEmail.disabled = true;
-                        const result = await sendStatusEmail(order);
-                        if (result.sent) {
-                            const until = Date.now() + 60000;
-                            sessionStorage.setItem(cooldownKey, String(until));
-                            resendEmail.textContent = "E-mail enviado há pouco";
-                            window.setTimeout(() => {
+                        resendEmail.textContent = "Enviando…";
+                        void (async () => {
+                            let result;
+                            try {
+                                result = await sendStatusEmail(order);
+                            } catch {
+                                result = { error: "O envio falhou inesperadamente. Confira sua conexão e tente novamente." };
+                            }
+                            if (result.sent) {
+                                const until = Date.now() + 60000;
+                                sessionStorage.setItem(cooldownKey, String(until));
+                                resendEmail.textContent = "E-mail enviado há pouco";
+                                window.setTimeout(() => {
+                                    resendEmail.disabled = false;
+                                    resendEmail.textContent = "Enviar atualização agora";
+                                    sessionStorage.removeItem(cooldownKey);
+                                }, 60000);
+                            } else {
                                 resendEmail.disabled = false;
                                 resendEmail.textContent = "Enviar atualização agora";
-                                sessionStorage.removeItem(cooldownKey);
-                            }, 60000);
-                        } else resendEmail.disabled = false;
-                        setMessage(result.sent
-                            ? `Aviso da etapa “${statusName}” enviado para ${order.client_email}. O botão ficará pausado por 1 minuto para evitar duplicidade.`
-                            : result.error || result.message, Boolean(result.error));
+                            }
+                            setMessage(result.sent
+                                ? `Aviso da etapa “${statusName}” enviado para ${order.client_email}. O botão ficará pausado por 1 minuto para evitar duplicidade.`
+                                : result.error || result.message, Boolean(result.error));
+                        })();
                     });
                     tracking.append(document.createTextNode(" "), resendEmail);
                 }
