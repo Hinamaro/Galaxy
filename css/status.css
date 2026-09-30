@@ -108,6 +108,10 @@
 .tracking-privacy { max-width: 620px; padding: 10px 13px; border-radius: 12px; background: rgba(255,255,255,.55); }
 .tracking-deliveries { display: grid; gap: 12px; margin-top: 18px; padding: 16px; border: 1px solid #e7d7ef; border-radius: 15px; background: linear-gradient(140deg,#fff8fc,#f4eefb); }
 .tracking-deliveries h4 { margin: 0; color: #755385; font-size: .93rem; }
+.tracking-delivery-password { display: grid; gap: 6px; padding: 12px; border: 1px solid #e5d1e9; border-radius: 12px; background: rgba(255,255,255,.82); }
+.tracking-delivery-password label { color: #624476; font-size: .78rem; font-weight: 750; }
+.tracking-delivery-password input { width: 100%; min-height: 42px; padding: 9px 11px; border: 1px solid #dfbfdc; border-radius: 10px; color: #482651; font: inherit; font-size: .85rem; }
+.tracking-delivery-password p { margin: 0; color: var(--muted); font-size: .72rem; line-height: 1.45; }
 .tracking-delivery-list { display: grid; gap: 10px; }
 .tracking-delivery-item { display: grid; justify-items: start; gap: 7px; padding: 13px; border: 1px solid rgba(220,199,229,.84); border-radius: 12px; background: rgba(255,255,255,.85); }
 .tracking-delivery-item strong { color: #58356d; overflow-wrap: anywhere; font-size: .85rem; }
@@ -115,6 +119,8 @@
 .tracking-delivery-item p { margin: 0; color: #765285; font-size: .8rem; }
 .tracking-delivery-item img { display: block; max-width: min(100%, 480px); max-height: 420px; border: 1px solid #ead8ed; border-radius: 10px; object-fit: contain; background: #fff; }
 .tracking-delivery-item button { min-height: 38px; padding: 7px 13px; font-size: .76rem; }
+.tracking-delivery-item a.button { display: inline-flex; align-items: center; min-height: 38px; padding: 7px 13px; font-size: .76rem; }
+.delivery-access-message { color: var(--muted); font-size: .72rem; line-height: 1.4; }
 @media (max-width: 560px) {
     .tracking-result { padding: 18px 15px; }
     .tracking-result-heading { align-items: flex-start; flex-direction: column; }

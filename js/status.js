@@ -184,9 +184,31 @@ document.addEventListener("DOMContentLoaded", async () => {
             deliverySection.className = "tracking-deliveries";
             const deliveryTitle = document.createElement("h4");
             deliveryTitle.textContent = "Arquivos compartilhados pela artista";
+            const protectedFiles = deliveryFiles.filter(file => file.password_required);
+            let deliveryPasswordInput = null;
+            if (protectedFiles.length) {
+                const passwordBox = document.createElement("div");
+                passwordBox.className = "tracking-delivery-password";
+                const passwordLabel = document.createElement("label");
+                passwordLabel.textContent = "Senha enviada pela artista";
+                deliveryPasswordInput = document.createElement("input");
+                deliveryPasswordInput.id = "tracking-delivery-password";
+                passwordLabel.htmlFor = deliveryPasswordInput.id;
+                deliveryPasswordInput.type = "password";
+                deliveryPasswordInput.autocomplete = "current-password";
+                deliveryPasswordInput.minLength = 8;
+                deliveryPasswordInput.maxLength = 72;
+                deliveryPasswordInput.placeholder = "Digite a senha para abrir os arquivos";
+                const passwordHint = document.createElement("p");
+                passwordHint.textContent = "Essa senha é diferente do código de acompanhamento e foi compartilhada por outro canal.";
+                passwordBox.append(passwordLabel, deliveryPasswordInput, passwordHint);
+                deliverySection.append(deliveryTitle, passwordBox);
+            } else {
+                deliverySection.append(deliveryTitle);
+            }
             const deliveryList = document.createElement("div");
             deliveryList.className = "tracking-delivery-list";
-            deliverySection.append(deliveryTitle, deliveryList);
+            deliverySection.append(deliveryList);
             for (const file of deliveryFiles) {
                 const item = document.createElement("article");
                 item.className = "tracking-delivery-item";
@@ -194,12 +216,14 @@ document.addEventListener("DOMContentLoaded", async () => {
                 name.textContent = file.original_name;
                 const kindNames = { sketch: "Esboço", final: "Arte final", other: "Arquivo" };
                 const info = document.createElement("span");
-                info.textContent = `${kindNames[file.file_kind] || "Arquivo"} · ${(Number(file.file_size) / 1048576).toFixed(1)} MB`;
+                info.textContent = `${kindNames[file.file_kind] || "Arquivo"} · ${(Number(file.file_size) / 1048576).toFixed(1)} MB${file.password_required ? " · protegido por senha" : ""}`;
                 const open = document.createElement("button");
                 open.type = "button";
                 open.className = "button button-secondary";
-                open.textContent = "Preparando arquivo…";
-                open.disabled = true;
+                open.textContent = file.password_required
+                    ? (file.mime_type?.startsWith("image/") ? "Abrir prévia protegida" : "Baixar arquivo protegido")
+                    : "Preparando arquivo…";
+                open.disabled = !file.password_required;
                 item.append(name, info);
                 if (file.note) {
                     const note = document.createElement("p");
@@ -207,25 +231,68 @@ document.addEventListener("DOMContentLoaded", async () => {
                     item.append(note);
                 }
                 deliveryList.append(item);
-                const { data: signedData, error: signedError } = await client.functions.invoke("get-order-delivery", {
-                    body: { lookupCode: code, fileId: file.id }
-                });
-                if (signedError || !signedData?.downloadUrl) {
-                    open.textContent = "Arquivo temporariamente indisponível";
-                    open.disabled = true;
-                } else {
-                    open.textContent = "Baixar arquivo";
+                const accessMessage = document.createElement("span");
+                accessMessage.className = "delivery-access-message";
+                if (file.password_required) {
                     open.disabled = false;
-                    open.addEventListener("click", () => window.open(signedData.downloadUrl, "_blank", "noopener,noreferrer"));
-                }
-                if (!signedError && signedData?.previewUrl && file.mime_type?.startsWith("image/")) {
-                    const preview = document.createElement("img");
-                    preview.src = signedData.previewUrl;
-                    preview.alt = `Prévia: ${file.original_name}`;
-                    preview.loading = "lazy";
-                    item.append(preview);
+                    open.addEventListener("click", async () => {
+                        const password = deliveryPasswordInput?.value || "";
+                        if (!password) {
+                            accessMessage.textContent = "Digite a senha enviada pela artista.";
+                            deliveryPasswordInput?.focus();
+                            return;
+                        }
+                        open.disabled = true;
+                        accessMessage.textContent = "Conferindo senha…";
+                        const { data: signedData, error: signedError } = await client.functions.invoke("get-order-delivery", {
+                            body: { lookupCode: code, fileId: file.id, deliveryPassword: password }
+                        });
+                        open.disabled = false;
+                        if (signedError || !signedData?.downloadUrl) {
+                            accessMessage.textContent = "Não foi possível liberar. Confira a senha com a artista e tente novamente.";
+                            return;
+                        }
+                        if (signedData.previewUrl && file.mime_type?.startsWith("image/")) {
+                            let preview = item.querySelector("img");
+                            if (!preview) {
+                                preview = document.createElement("img");
+                                preview.alt = `Prévia: ${file.original_name}`;
+                                preview.loading = "lazy";
+                                item.insertBefore(preview, accessMessage);
+                            }
+                            preview.src = signedData.previewUrl;
+                        }
+                        const download = document.createElement("a");
+                        item.querySelector(".delivery-download-link")?.remove();
+                        download.className = "button button-secondary delivery-download-link";
+                        download.href = signedData.downloadUrl;
+                        download.target = "_blank";
+                        download.rel = "noopener noreferrer";
+                        download.textContent = "Baixar arquivo";
+                        item.insertBefore(download, accessMessage);
+                        accessMessage.textContent = "Link temporário válido por 5 minutos.";
+                    });
+                } else {
+                    const { data: signedData, error: signedError } = await client.functions.invoke("get-order-delivery", {
+                        body: { lookupCode: code, fileId: file.id }
+                    });
+                    if (signedError || !signedData?.downloadUrl) {
+                        open.textContent = "Arquivo temporariamente indisponível";
+                    } else {
+                        open.textContent = "Baixar arquivo";
+                        open.disabled = false;
+                        open.addEventListener("click", () => window.open(signedData.downloadUrl, "_blank", "noopener,noreferrer"));
+                        if (signedData.previewUrl && file.mime_type?.startsWith("image/")) {
+                            const preview = document.createElement("img");
+                            preview.src = signedData.previewUrl;
+                            preview.alt = `Prévia: ${file.original_name}`;
+                            preview.loading = "lazy";
+                            item.append(preview);
+                        }
+                    }
                 }
                 item.append(open);
+                item.append(accessMessage);
             }
             trackingResult.append(deliverySection);
         }

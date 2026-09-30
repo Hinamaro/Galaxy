@@ -553,6 +553,95 @@ document.addEventListener("DOMContentLoaded", async () => {
         section.className = "order-deliveries";
         const title = document.createElement("h5");
         title.textContent = "Esboços e arquivos do cliente";
+        const passwordPanel = document.createElement("div");
+        passwordPanel.className = "delivery-password-panel";
+        const passwordTitle = document.createElement("strong");
+        passwordTitle.textContent = "Senha de acesso aos arquivos";
+        const passwordHelp = document.createElement("p");
+        passwordHelp.textContent = "Defina uma senha para os arquivos protegidos. O e-mail envia apenas o link; compartilhe a senha com o cliente por outro canal. A senha não pode ser recuperada aqui.";
+        const passwordState = document.createElement("p");
+        passwordState.className = "delivery-password-state";
+        passwordState.textContent = "Conferindo proteção…";
+        const passwordForm = document.createElement("form");
+        passwordForm.className = "delivery-password-form";
+        const passwordLabel = document.createElement("label");
+        passwordLabel.textContent = "Nova senha (mínimo 8 caracteres)";
+        const passwordInput = document.createElement("input");
+        passwordInput.id = `delivery-password-${order.id}`;
+        passwordLabel.htmlFor = passwordInput.id;
+        passwordInput.type = "password";
+        passwordInput.minLength = 8;
+        passwordInput.maxLength = 72;
+        passwordInput.required = true;
+        passwordInput.autocomplete = "new-password";
+        passwordInput.placeholder = "Digite uma senha para este pedido";
+        const confirmPasswordLabel = document.createElement("label");
+        confirmPasswordLabel.textContent = "Confirme a senha";
+        const confirmPassword = document.createElement("input");
+        confirmPassword.id = `delivery-password-confirm-${order.id}`;
+        confirmPasswordLabel.htmlFor = confirmPassword.id;
+        confirmPassword.type = "password";
+        confirmPassword.required = true;
+        confirmPassword.autocomplete = "new-password";
+        confirmPassword.placeholder = "Digite novamente a mesma senha";
+        const savePassword = document.createElement("button");
+        savePassword.type = "submit";
+        savePassword.className = "button button-secondary";
+        savePassword.textContent = "Salvar senha";
+        const copyPassword = document.createElement("button");
+        copyPassword.type = "button";
+        copyPassword.className = "copy-tracking-code";
+        copyPassword.textContent = "Copiar senha";
+        copyPassword.addEventListener("click", async () => {
+            if (!passwordInput.value) { setMessage("Digite a senha antes de copiá-la.", true); return; }
+            try {
+                await navigator.clipboard.writeText(passwordInput.value);
+                setMessage("Senha copiada. Compartilhe-a com o cliente por outro canal, separada do link.");
+            } catch { setMessage("Não foi possível copiar automaticamente. Selecione a senha e copie manualmente.", true); }
+        });
+        passwordForm.append(passwordLabel, passwordInput, confirmPasswordLabel, confirmPassword, savePassword, copyPassword);
+        let passwordConfigured = false;
+        const passwordStatePromise = client.rpc("has_commission_delivery_password", { target_order: order.id })
+            .then(({ data, error }) => {
+                if (error) {
+                    passwordState.textContent = "Não foi possível verificar a proteção. Aplique a migração de senha no Supabase.";
+                    passwordState.dataset.state = "error";
+                    return false;
+                }
+                passwordConfigured = data === true;
+                passwordState.textContent = passwordConfigured
+                    ? "Senha configurada. Definir outra substitui a senha atual."
+                    : "Nenhuma senha configurada ainda.";
+                passwordState.dataset.state = passwordConfigured ? "ready" : "empty";
+                return true;
+            });
+        passwordForm.addEventListener("submit", async event => {
+            event.preventDefault();
+            const value = passwordInput.value;
+            if (value !== confirmPassword.value) {
+                setMessage("As duas senhas não coincidem. Confira e tente novamente.", true);
+                confirmPassword.focus();
+                return;
+            }
+            if (new TextEncoder().encode(value).length < 8 || new TextEncoder().encode(value).length > 72) {
+                setMessage("Use uma senha com pelo menos 8 caracteres e até 72 bytes.", true);
+                return;
+            }
+            savePassword.disabled = true;
+            const { error } = await client.rpc("set_commission_delivery_password", {
+                target_order: order.id, new_password: value
+            });
+            savePassword.disabled = false;
+            if (error) {
+                setMessage("Não foi possível salvar a senha. Confira a migração de proteção de arquivos no Supabase.", true);
+                return;
+            }
+            passwordConfigured = true;
+            passwordState.textContent = "Senha configurada. Compartilhe-a por outro canal; ela não será incluída no e-mail.";
+            passwordState.dataset.state = "ready";
+            setMessage("Senha dos arquivos salva com segurança. Compartilhe o link e a senha separadamente.");
+        });
+        passwordPanel.append(passwordTitle, passwordHelp, passwordState, passwordForm);
         const list = document.createElement("div");
         list.className = "delivery-file-list";
         const kindNames = { sketch: "Esboço", final: "Arte final", other: "Outro arquivo" };
@@ -569,7 +658,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             const name = document.createElement("strong");
             name.textContent = file.original_name;
             const description = document.createElement("span");
-            description.textContent = `${kindNames[file.file_kind] || "Arquivo"} · ${(file.file_size / 1048576).toFixed(1)} MB${file.client_visible ? " · disponível para cliente" : " · privado"}`;
+            description.textContent = `${kindNames[file.file_kind] || "Arquivo"} · ${(file.file_size / 1048576).toFixed(1)} MB${file.client_visible ? " · disponível para cliente" : " · privado"}${file.password_required ? " · protegido por senha" : ""}`;
             item.append(name, description);
             if (file.note) {
                 const note = document.createElement("small");
@@ -585,6 +674,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             visible.checked = file.client_visible;
             visibleLabel.append(visible, document.createTextNode(" Cliente pode abrir"));
             visible.addEventListener("change", async () => {
+                await passwordStatePromise;
+                if (visible.checked && file.password_required && !passwordConfigured) {
+                    visible.checked = false;
+                    setMessage("Defina a senha do pedido antes de liberar este arquivo protegido.", true);
+                    return;
+                }
                 visible.disabled = true;
                 const { error } = await client.from("commission_deliveries").update({ client_visible: visible.checked }).eq("id", file.id);
                 visible.disabled = false;
@@ -634,9 +729,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         vis.type = "checkbox";
         vis.checked = true;
         visLabel.append(vis, document.createTextNode("Disponibilizar ao cliente agora"));
+        const passwordRequiredLabel = document.createElement("label");
+        passwordRequiredLabel.className = "delivery-visible-control";
+        const passwordRequired = document.createElement("input");
+        passwordRequired.type = "checkbox";
+        passwordRequired.checked = true;
+        passwordRequiredLabel.append(passwordRequired, document.createTextNode("Exigir a senha definida para este pedido"));
         const help = document.createElement("small");
         help.className = "delivery-upload-help";
-        help.textContent = "Até 100 MB por arquivo quando o limite do plano Supabase permitir. Arquivos grandes enviam com progresso e podem continuar após falha de conexão.";
+        help.textContent = "Arquivos protegidos só abrem com a senha configurada acima. Depois, mude a etapa para Aguardando aprovação (esboço) ou Entregue (arte final) para enviar o link ao cliente por e-mail. Até 100 MB quando o plano Supabase permitir.";
         const progress = document.createElement("progress");
         progress.max = 100;
         progress.value = 0;
@@ -645,11 +746,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         submit.type = "submit";
         submit.className = "button button-secondary";
         submit.textContent = "Enviar arquivo privado";
-        form.append(fileLabel, input, kindLabel, kind, noteLabel, note, visLabel, help, progress, submit);
+        form.append(fileLabel, input, kindLabel, kind, noteLabel, note, passwordRequiredLabel, visLabel, help, progress, submit);
         form.addEventListener("submit", async event => {
             event.preventDefault();
             const file = input.files?.[0];
             if (!file) return;
+            await passwordStatePromise;
+            if (vis.checked && passwordRequired.checked && !passwordConfigured) {
+                setMessage("Defina primeiro a senha do pedido para liberar arquivos protegidos.", true);
+                return;
+            }
             const maxBytes = 100 * 1024 * 1024;
             if (file.size > maxBytes) { setMessage("Este arquivo passa do limite de 100 MB.", true); return; }
             if (!window.tus?.Upload) { setMessage("Não foi possível preparar o envio de arquivo. Atualize a página e tente de novo.", true); return; }
@@ -695,12 +801,15 @@ document.addEventListener("DOMContentLoaded", async () => {
                         order_id: order.id, file_path: path, original_name: file.name.slice(0, 255),
                         file_size: file.size, mime_type: file.type || "application/octet-stream",
                         file_kind: kind.value, note: note.value.trim(), client_visible: vis.checked,
+                        password_required: passwordRequired.checked,
                         created_by: userData.user.id
                     }, { onConflict: "file_path" });
                     if (error) {
                         await client.storage.from("commission-deliveries").remove([path]);
                         setMessage("O arquivo chegou, mas não foi possível vinculá-lo ao pedido. Tente novamente.", true);
-                    } else setMessage("Arquivo enviado. O cliente já pode abri-lo com o código do pedido.");
+                    } else setMessage(passwordRequired.checked
+                        ? "Arquivo enviado com proteção. Envie a senha separadamente e mude a etapa para notificar o cliente."
+                        : "Arquivo enviado. O cliente poderá abri-lo com o código do pedido.");
                     await loadOrders();
                 }
             });
@@ -709,7 +818,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 upload.start();
             }).catch(() => upload.start());
         });
-        section.append(title, list, form);
+        section.append(title, passwordPanel, list, form);
         return section;
     }
 
@@ -1066,7 +1175,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 client.from("commission_client_requests").select("id, order_id, request_type, message, state, created_at, handled_at").in("order_id", orderIds).order("created_at", { ascending: false }),
                 client.from("commission_payments").select("id, order_id, amount, paid_at, payment_method, note").in("order_id", orderIds).order("paid_at", { ascending: false }),
                 client.from("commission_email_notifications").select("id, order_id, status, sent, detail, created_at").in("order_id", orderIds).order("created_at", { ascending: false }),
-                client.from("commission_deliveries").select("id, order_id, file_path, original_name, file_size, mime_type, file_kind, note, client_visible, created_at").in("order_id", orderIds).order("created_at", { ascending: false })
+                client.from("commission_deliveries").select("id, order_id, file_path, original_name, file_size, mime_type, file_kind, note, client_visible, password_required, created_at").in("order_id", orderIds).order("created_at", { ascending: false })
             ]);
             if (historyResult.error || requestsResult.error || paymentsResult.error || emailResult.error) {
                 setMessage(emailResult.error

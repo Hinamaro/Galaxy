@@ -13,9 +13,11 @@ Deno.serve(async (request) => {
   }
 
   try {
-    const { lookupCode, fileId } = await request.json();
+    const { lookupCode, fileId, deliveryPassword } = await request.json();
     if (typeof lookupCode !== "string" || !/^[a-f0-9-]{1,64}$/i.test(lookupCode)
-      || typeof fileId !== "string" || !/^[0-9a-f-]{36}$/i.test(fileId)) {
+      || typeof fileId !== "string" || !/^[0-9a-f-]{36}$/i.test(fileId)
+      || (deliveryPassword !== undefined && deliveryPassword !== null
+        && (typeof deliveryPassword !== "string" || deliveryPassword.length > 256))) {
       return Response.json({ error: "Código ou arquivo inválido." }, { status: 400, headers: corsHeaders });
     }
 
@@ -24,13 +26,14 @@ Deno.serve(async (request) => {
     if (!url || !serviceKey) throw new Error("Configuração segura indisponível.");
 
     const admin = createClient(url, serviceKey, { auth: { persistSession: false } });
-    const { data, error } = await admin.rpc("get_order_delivery_download", {
+    const { data, error } = await admin.rpc("get_protected_order_delivery_download", {
       lookup_code: lookupCode,
       delivery_id: fileId,
+      delivery_password: deliveryPassword || null,
     });
     const file = Array.isArray(data) ? data[0] : data;
     if (error || !file?.file_path) {
-      return Response.json({ error: "Arquivo indisponível para este código." }, { status: 404, headers: corsHeaders });
+      return Response.json({ error: "Senha incorreta, ainda não configurada ou arquivo indisponível." }, { status: 403, headers: corsHeaders });
     }
 
     const storage = admin.storage.from("commission-deliveries");

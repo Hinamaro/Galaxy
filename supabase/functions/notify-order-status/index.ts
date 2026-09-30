@@ -15,6 +15,9 @@ const statusColors: Record<string, string> = {
   received: "#ad5a83", quote: "#a74f7f", payment: "#874f87", queue: "#805a98",
   sketch: "#68568c", approval: "#5b4c8c", finalizing: "#523c76", delivered: "#47765e", cancelled: "#735666",
 };
+const escapeHtml = (value: unknown) => String(value ?? "")
+  .replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+  .replaceAll('"', "&quot;").replaceAll("'", "&#39;");
 
 Deno.serve(async request => {
   if (request.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -48,6 +51,12 @@ Deno.serve(async request => {
     .select("id, client_name, client_email, email_updates_enabled, artist_email_message, artist_email_messages, art_type, status, tracking_code, estimated_delivery")
     .eq("id", orderId).single();
   if (error || !order) return Response.json({ error: "Pedido não encontrado ou sem acesso." }, { status: 404, headers: corsHeaders });
+  const { data: visibleDeliveries } = await supabase.from("commission_deliveries")
+    .select("file_kind, password_required")
+    .eq("order_id", order.id).eq("client_visible", true);
+  const sharedFiles = Array.isArray(visibleDeliveries) ? visibleDeliveries : [];
+  const sharedSketch = sharedFiles.filter(file => file.file_kind === "sketch");
+  const sharedFinal = sharedFiles.filter(file => file.file_kind === "final");
   if (!order.email_updates_enabled || !order.client_email) {
     return Response.json({ skipped: true, reason: "E-mail não autorizado para atualizações." }, { headers: corsHeaders });
   }
@@ -85,11 +94,27 @@ Deno.serve(async request => {
     : order.status === "delivered"
       ? "✦ Sua comissão foi finalizada"
       : `✦ Sua comissão foi atualizada: ${label}`;
-  const preheader = order.status === "approval"
-    ? "A artista compartilhou novidades. Abra para conferir pelo acompanhamento do pedido."
-    : order.status === "delivered"
-      ? "Sua arte está pronta. Acesse o acompanhamento para ver os detalhes."
-      : "A artista atualizou seu pedido. Veja a nova etapa e acompanhe pelo site.";
+  const hasLinkedDelivery = order.status === "approval" ? sharedSketch.length > 0
+    : order.status === "delivered" ? sharedFinal.length > 0 : false;
+  const relevantFiles = order.status === "approval" ? sharedSketch : order.status === "delivered" ? sharedFinal : [];
+  const hasPasswordProtectedDelivery = relevantFiles.some(file => file.password_required);
+  const ctaLabel = hasLinkedDelivery
+    ? order.status === "approval" ? "Acessar esboço" : "Acessar arte final"
+    : "Acompanhar minha comissão";
+  const introMessage = order.status === "approval" && hasLinkedDelivery
+    ? `Seu esboço está disponível para revisão.${hasPasswordProtectedDelivery ? " A artista enviará a senha separadamente." : " Acesse pelo botão abaixo."}`
+    : order.status === "delivered" && hasLinkedDelivery
+      ? `Sua arte final está disponível.${hasPasswordProtectedDelivery ? " A artista enviará a senha separadamente." : " Acesse pelo botão abaixo."}`
+      : "A artista atualizou sua comissão. Acesse o acompanhamento para ver os detalhes.";
+  const preheader = order.status === "approval" && hasLinkedDelivery
+    ? "Seu esboço está disponível para revisão no acompanhamento do pedido."
+    : order.status === "delivered" && hasLinkedDelivery
+      ? "Sua arte final está pronta. Abra o link para acessar e baixar."
+      : order.status === "approval"
+        ? "A artista atualizou seu pedido. Acesse o acompanhamento para ver os detalhes."
+        : order.status === "delivered"
+          ? "Sua comissão foi finalizada. Acesse o acompanhamento para ver os detalhes."
+          : "A artista atualizou seu pedido. Veja a nova etapa no site.";
   const response = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -101,16 +126,18 @@ Deno.serve(async request => {
       template_params: {
         to_email: order.client_email,
         from_name: "Zoolixianas · Comissões",
-        client_name: order.client_name,
-        art_type: order.art_type,
+        client_name: escapeHtml(order.client_name),
+        art_type: escapeHtml(order.art_type),
         status_label: label,
         eta,
         tracking_code: order.tracking_code,
         tracking_url: trackingUrl,
         has_eta: Boolean(order.estimated_delivery),
         has_artist_message: Boolean(artistMessage),
-        artist_message: artistMessage,
+        artist_message: escapeHtml(artistMessage),
         status_color: statusColor,
+        cta_label: ctaLabel,
+        intro_message: introMessage,
         subject,
         preheader,
       },
